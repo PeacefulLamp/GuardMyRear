@@ -10,6 +10,16 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.pekka.guardmyrear.NewLayoutActivity"
-    tools:showIn="@layout/app_bar_main">
+    tools:showIn="@layout/activity_new_layout">
 
+    <Button
+        android:layout_width="100pt"
+        android:layout_height="100pt"
+
+        android:text="Connect"
+
+        android:id="@+id/button"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="startStreamActivity"/>
 </RelativeLayout>
