@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_gallery) {
 
             Intent a = new Intent(this,StreamActivity.class);
-            a.putExtra(getResources().getString(R.string.stream_resource),"rtsp://media.smart-streaming.com/mytest/mp4:sample.mp4");
+            a.putExtra(getResources().getString(R.string.stream_resource),"http://192.168.42.1:8554/stream/video.mjpeg");
             startActivity(a);
         } else if (id == R.id.nav_share) {
 
