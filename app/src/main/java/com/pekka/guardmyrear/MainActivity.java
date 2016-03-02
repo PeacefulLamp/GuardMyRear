@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_gallery) {
 
             Intent a = new Intent(this,StreamActivity.class);
-            a.putExtra(getResources().getString(R.string.stream_resource),"http://192.168.42.1:8554/stream/video.mjpeg");
+            a.putExtra(getResources().getString(R.string.stream_resource),"http://192.168.42.1:8554/stream");
             startActivity(a);
         } else if (id == R.id.nav_share) {
 
