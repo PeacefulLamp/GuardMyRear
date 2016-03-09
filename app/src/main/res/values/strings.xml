@@ -10,7 +10,9 @@
     <string name="stream_resource">StreamName</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment\n
-    Hellooooooo</string>
+    <string name="sensor_left">3.45</string>
+    <string name="sensor_center">5.32</string>
+    <string name="sensor_right">654.23</string>
+
     <string name="title_activity_new_layout">GUARD MY REAR</string>
 </resources>

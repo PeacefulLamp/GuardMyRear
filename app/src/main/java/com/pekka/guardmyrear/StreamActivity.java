@@ -1,6 +1,9 @@
 package com.pekka.guardmyrear;
 
 import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -8,7 +11,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 public class StreamActivity extends AppCompatActivity implements SensorIndicatorFragment.OnFragmentInteractionListener {
 
@@ -147,4 +153,32 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
+
+    int newWidth = 200;
+    int newHeight = 200;
+
+    public void resizeImage(View view){
+
+        newHeight += 10;
+        newWidth += 10;
+
+        Bitmap indicator = BitmapFactory.decodeResource(getResources(), R.mipmap.left_indicator);
+        int width = indicator.getWidth();
+        int height = indicator.getHeight();
+
+        Matrix matrix = new Matrix();
+
+        float scaleWidth = ((float) newWidth) / width; /*replace width + test with desired height*/
+        float scaleHeight = ((float) newHeight) / height;
+
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        Bitmap resizedBitmap = Bitmap.createBitmap(indicator, 0, 0, width, height, matrix, true);
+        ImageView im = (ImageView) findViewById(R.id.left_indicator_image);
+        im.setImageBitmap(resizedBitmap);
+
+        TextView textView = (TextView) findViewById(R.id.left_indicator_value);
+        textView.setText(Integer.toString(newHeight));
+    }
+
 }

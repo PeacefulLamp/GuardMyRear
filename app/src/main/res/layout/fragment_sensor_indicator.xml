@@ -5,13 +5,37 @@
     tools:context="com.pekka.guardmyrear.SensorIndicatorFragment">
 
     <!-- TODO: Update blank fragment layout -->
+
+
+    <ImageView
+        android:src="@mipmap/left_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="0dp"
+        android:id="@+id/left_indicator_image"
+        android:layout_gravity="left|bottom"
+        android:contentDescription="this is a red circle"
+        android:onClick="resizeImage" />
+
     <TextView
+        android:id="@+id/left_indicator_value"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:text="@string/sensor_left"
+        android:layout_gravity="left|top" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sensor_center"
+        android:id="@+id/textView3"
+        android:layout_gravity="center_horizontal|top" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sensor_right"
+        android:id="@+id/textView2"
+        android:layout_gravity="right|top" />
 
 </FrameLayout>

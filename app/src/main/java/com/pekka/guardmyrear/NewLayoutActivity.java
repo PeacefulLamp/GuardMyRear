@@ -1,6 +1,9 @@
 package com.pekka.guardmyrear;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -9,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 
 public class NewLayoutActivity extends AppCompatActivity {
 
@@ -43,9 +47,9 @@ public class NewLayoutActivity extends AppCompatActivity {
     }
 
     public void startStreamActivity(View view){
+        System.out.println("sdlfkjsflkj");
         Intent a = new Intent(this,StreamActivity.class);
         a.putExtra(getResources().getString(R.string.stream_resource),"http://192.168.42.1:8554/stream");
         startActivity(a);
     }
-
 }
