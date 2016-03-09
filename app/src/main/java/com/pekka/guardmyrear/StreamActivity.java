@@ -10,6 +10,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class StreamActivity extends AppCompatActivity implements SensorIndicatorFragment.OnFragmentInteractionListener {
 
     /**
@@ -56,6 +64,10 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         }
     };
 
+    /** Sensor data */
+    private DatagramSocket m_data_socket;
+    private Timer m_data_timer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,6 +100,24 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         });
 
         view.loadUrl(getIntent().getStringExtra(getResources().getString(R.string.stream_resource)));
+
+        try {
+            m_data_socket = new DatagramSocket(5005);
+            TimerTask check_task = new TimerTask() {
+                @Override
+                public void run() {
+                    SocketListen(m_data_socket);
+                }
+            };
+            m_data_timer = new Timer("Data Timer");
+            m_data_timer.scheduleAtFixedRate(check_task,100,100);
+
+            System.out.println("Created UDP multicast listener");
+
+        }catch(SocketException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -146,5 +176,24 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    /**
+     * Listening to UDP multicast and receiving sensor packets
+     */
+    private static String SocketListen(DatagramSocket s)
+    {
+        byte[] data = new byte[4096];
+        DatagramPacket p = new DatagramPacket(data,data.length);
+        try {
+            s.receive(p);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(p.getLength()>0)
+        {
+            return new String(Arrays.copyOf(data,p.getLength()));
+        }
+        return null;
     }
 }
