@@ -106,7 +106,8 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
             TimerTask check_task = new TimerTask() {
                 @Override
                 public void run() {
-                    SocketListen(m_data_socket);
+                    String data = SocketListen(m_data_socket);
+                    System.out.println(data);
                 }
             };
             m_data_timer = new Timer("Data Timer");
