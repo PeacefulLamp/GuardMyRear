@@ -5,9 +5,6 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.net.Uri;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -270,9 +267,9 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     int i = 200;
     public void resizeImage(Activity view){
         i += 5;
-        this.resizeLeftIndicator(view, i);
-        this.resizeRightIndicator(view, i);
-        this.resizeCenterIndicator(view, i);
+        resizeLeftIndicator(view, i);
+        resizeRightIndicator(view, i);
+        resizeCenterIndicator(view, i);
     }
 
 
