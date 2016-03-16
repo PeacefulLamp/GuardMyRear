@@ -91,7 +91,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         public void run() {
             String data = SocketListen(m_socket);
             JSONObject js = parseJSON(data);
-            Sensorize(m_view,js);
+            //Sensorize(m_view,js);
         }
     }
 
