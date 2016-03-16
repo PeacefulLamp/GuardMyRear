@@ -1,9 +1,8 @@
 package com.pekka.guardmyrear;
 
 import android.annotation.SuppressLint;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -11,9 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -75,6 +72,8 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     private DatagramSocket m_data_socket;
     private Timer m_data_timer;
 
+    private NotificationManager m_notifyman;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,6 +125,12 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         {
             e.printStackTrace();
         }
+
+        Context context = getApplicationContext();
+        m_notifyman = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Uri snd = NotificationCenter.GetRingtone();
+        NotificationCenter.PingNotification(m_notifyman,context,snd,"Guard My Rear","Someone is at your rear!");
     }
 
     @Override
@@ -205,7 +210,6 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         return null;
     }
 
-
     int i = 200;
     public void resizeImage(View view){
         i += 5;
@@ -236,38 +240,4 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         imageView.getLayoutParams().width = 2*distance;
         textView.setText(Integer.toString(distance));
     }
-
-
-
-    //OLD *BAD* CODE FOR SCALING IMAGES:
-    /*
-    public void resizeCenterIndicator(View view, int distance){
-        int newHeight = distance; //apply math
-        int newWidth = 2*distance; // apply math
-
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.center_indicator);
-        ImageView imageView = (ImageView) findViewById(R.id.center_indicator_image);
-        TextView textView = (TextView) findViewById(R.id.center_indicator_value);
-
-        StreamActivity.resize(view, textView, imageView, bitmap, newHeight, newWidth, distance);
-    }
-
-    public static void resize(View view, TextView textView, ImageView imageView, Bitmap bitmap, int newHeight, int newWidth, int distance){
-
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-
-        Matrix matrix = new Matrix();
-
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-
-        matrix.postScale(scaleWidth, scaleHeight);
-
-        Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-        imageView.setImageBitmap(resizedBitmap);
-
-        textView.setText(Integer.toString(distance));
-    }*/
-
 }
