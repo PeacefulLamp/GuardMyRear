@@ -1,5 +1,6 @@
 package com.pekka.guardmyrear;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.media.RingtoneManager;
@@ -25,7 +26,8 @@ public class NotificationCenter {
                 .setContentTitle(title)
                 .setContentText(msg)
                 .setSound(rt)
-                .setSmallIcon(R.drawable.ic_menu_camera);
+                .setSmallIcon(R.drawable.ic_menu_camera)
+                .setVisibility(Notification.VISIBILITY_PUBLIC);
         man.notify(0,bld.build());
     }
 }

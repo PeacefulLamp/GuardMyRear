@@ -1,6 +1,7 @@
 package com.pekka.guardmyrear;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.net.Uri;
@@ -80,6 +81,23 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
     private NotificationManager m_notifyman;
 
+    private class SensorTask extends TimerTask
+    {
+        private DatagramSocket m_socket;
+        private Activity m_view;
+        public SensorTask(Activity view, DatagramSocket socket)
+        {
+            m_socket = socket;
+            m_view = view;
+        }
+        @Override
+        public void run() {
+            String data = SocketListen(m_socket);
+            JSONObject js = parseJSON(data);
+            Sensorize(m_view,js);
+        }
+    }
+
     /**
 
     _______________ON        CREATE ____________________
@@ -120,17 +138,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
         try {
             m_data_socket = new DatagramSocket(5005);
-            TimerTask check_task = new TimerTask() {
-                @Override
-                public void run() {
-                    String data = SocketListen(m_data_socket);
-
-                    JSONObject jsonObject = parseJSON(data);
-                    Sensorize(view jsonObject);
-
-                    System.out.println(data);
-                }
-            };
+            TimerTask check_task = new SensorTask(this, m_data_socket);
             m_data_timer = new Timer("Data Timer");
             m_data_timer.scheduleAtFixedRate(check_task,100,100);
 
@@ -236,7 +244,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         return jsonObject;
     }
 
-    private static void Sensorize(View view, JSONObject jsonObject){
+    private static void Sensorize(Activity view, JSONObject jsonObject){
 
         double sensor1 = 0;
         double sensor2 = 0;
@@ -260,7 +268,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
     //Method to test resize
     int i = 200;
-    public void resizeImage(View view){
+    public void resizeImage(Activity view){
         i += 5;
         this.resizeLeftIndicator(view, i);
         this.resizeRightIndicator(view, i);
@@ -268,14 +276,14 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     }
 
 
-    public static void resizeLeftIndicator(View view, int distance){
+    public static void resizeLeftIndicator(Activity view, int distance){
         ImageView imageView = (ImageView) view.findViewById(R.id.left_indicator_image);
         TextView textView = (TextView) view.findViewById(R.id.left_indicator_value);
         imageView.getLayoutParams().height = distance;
         imageView.getLayoutParams().width = distance;
         textView.setText(Integer.toString(distance));
     }
-    public static void resizeRightIndicator(View view, int distance){
+    public static void resizeRightIndicator(Activity view, int distance){
         ImageView imageView = (ImageView) view.findViewById(R.id.right_indicator_image);
         TextView textView = (TextView) view.findViewById(R.id.right_indicator_value);
         imageView.getLayoutParams().height = distance;
@@ -283,7 +291,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         textView.setText(Integer.toString(distance));
     }
 
-    public static void resizeCenterIndicator(View view, int distance){
+    public static void resizeCenterIndicator(Activity view, int distance){
         ImageView imageView = (ImageView) view.findViewById(R.id.center_indicator_image);
         TextView textView = (TextView) view.findViewById(R.id.center_indicator_value);
         imageView.getLayoutParams().height = distance;
