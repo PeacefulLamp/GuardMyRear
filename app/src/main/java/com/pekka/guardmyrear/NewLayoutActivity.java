@@ -52,7 +52,7 @@ public class NewLayoutActivity extends AppCompatActivity {
         WifiManager wman = (WifiManager)getApplicationContext()
                 .getSystemService(Context.WIFI_SERVICE);
 
-        if(!WifiStuff.ConnectNetwork(wman,"gmr","helloworld"))
+        if(!WifiStuff.ConnectNetwork(wman,"gmr",""))
         {
             Snackbar nice = Snackbar.make(findViewById(R.id.toolbar), R.string.wifi_error_message, Snackbar.LENGTH_LONG);
             nice.show();
