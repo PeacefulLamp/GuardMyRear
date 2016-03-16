@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +16,9 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -74,6 +80,11 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
     private NotificationManager m_notifyman;
 
+    /**
+
+    _______________ON        CREATE ____________________
+
+     **/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,6 +124,10 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
                 @Override
                 public void run() {
                     String data = SocketListen(m_data_socket);
+
+                    JSONObject jsonObject = parseJSON(data);
+                    Sensorize(view jsonObject);
+
                     System.out.println(data);
                 }
             };
@@ -194,8 +209,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     /**
      * Listening to UDP multicast and receiving sensor packets
      */
-    private static String SocketListen(DatagramSocket s)
-    {
+    private static String SocketListen(DatagramSocket s) {
         byte[] data = new byte[4096];
         DatagramPacket p = new DatagramPacket(data,data.length);
         try {
@@ -210,6 +224,41 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         return null;
     }
 
+    //Parse JSON string
+    private static JSONObject parseJSON(String s){
+        JSONObject jsonObject = null;
+
+        try {
+            jsonObject = new JSONObject(s);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
+
+    private static void Sensorize(View view, JSONObject jsonObject){
+
+        double sensor1 = 0;
+        double sensor2 = 0;
+        double sensor3 = 0;
+
+        try {
+            sensor1 = jsonObject.getDouble("key1");
+            sensor2 = jsonObject.getDouble("key2");
+            sensor3 = jsonObject.getDouble("key3");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //do math here
+
+        resizeLeftIndicator(view, (int) sensor1);
+        resizeRightIndicator(view, (int) sensor2);
+        resizeCenterIndicator(view, (int) sensor3);
+    }
+
+
+    //Method to test resize
     int i = 200;
     public void resizeImage(View view){
         i += 5;
@@ -218,24 +267,25 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         this.resizeCenterIndicator(view, i);
     }
 
-    public void resizeLeftIndicator(View view, int distance){
-        ImageView imageView = (ImageView) findViewById(R.id.left_indicator_image);
-        TextView textView = (TextView) findViewById(R.id.left_indicator_value);
+
+    public static void resizeLeftIndicator(View view, int distance){
+        ImageView imageView = (ImageView) view.findViewById(R.id.left_indicator_image);
+        TextView textView = (TextView) view.findViewById(R.id.left_indicator_value);
         imageView.getLayoutParams().height = distance;
         imageView.getLayoutParams().width = distance;
         textView.setText(Integer.toString(distance));
     }
-    public void resizeRightIndicator(View view, int distance){
-        ImageView imageView = (ImageView) findViewById(R.id.right_indicator_image);
-        TextView textView = (TextView) findViewById(R.id.right_indicator_value);
+    public static void resizeRightIndicator(View view, int distance){
+        ImageView imageView = (ImageView) view.findViewById(R.id.right_indicator_image);
+        TextView textView = (TextView) view.findViewById(R.id.right_indicator_value);
         imageView.getLayoutParams().height = distance;
         imageView.getLayoutParams().width = distance;
         textView.setText(Integer.toString(distance));
     }
 
-    public void resizeCenterIndicator(View view, int distance){
-        ImageView imageView = (ImageView) findViewById(R.id.center_indicator_image);
-        TextView textView = (TextView) findViewById(R.id.center_indicator_value);
+    public static void resizeCenterIndicator(View view, int distance){
+        ImageView imageView = (ImageView) view.findViewById(R.id.center_indicator_image);
+        TextView textView = (TextView) view.findViewById(R.id.center_indicator_value);
         imageView.getLayoutParams().height = distance;
         imageView.getLayoutParams().width = 2*distance;
         textView.setText(Integer.toString(distance));
