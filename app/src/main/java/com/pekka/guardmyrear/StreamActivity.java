@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -94,6 +95,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         });
 
         view.loadUrl(getIntent().getStringExtra(getResources().getString(R.string.stream_resource)));
+
     }
 
     @Override
@@ -154,31 +156,69 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
 
-    int newWidth = 200;
-    int newHeight = 200;
 
+    int i = 200;
     public void resizeImage(View view){
+        i += 5;
+        this.resizeLeftIndicator(view, i);
+        this.resizeRightIndicator(view, i);
+        this.resizeCenterIndicator(view, i);
+    }
 
-        newHeight += 10;
-        newWidth += 10;
+    public void resizeLeftIndicator(View view, int distance){
+        ImageView imageView = (ImageView) findViewById(R.id.left_indicator_image);
+        TextView textView = (TextView) findViewById(R.id.left_indicator_value);
+        imageView.getLayoutParams().height = distance;
+        imageView.getLayoutParams().width = distance;
+        textView.setText(Integer.toString(distance));
+    }
+    public void resizeRightIndicator(View view, int distance){
+        ImageView imageView = (ImageView) findViewById(R.id.right_indicator_image);
+        TextView textView = (TextView) findViewById(R.id.right_indicator_value);
+        imageView.getLayoutParams().height = distance;
+        imageView.getLayoutParams().width = distance;
+        textView.setText(Integer.toString(distance));
+    }
 
-        Bitmap indicator = BitmapFactory.decodeResource(getResources(), R.mipmap.left_indicator);
-        int width = indicator.getWidth();
-        int height = indicator.getHeight();
+    public void resizeCenterIndicator(View view, int distance){
+        ImageView imageView = (ImageView) findViewById(R.id.center_indicator_image);
+        TextView textView = (TextView) findViewById(R.id.center_indicator_value);
+        imageView.getLayoutParams().height = distance;
+        imageView.getLayoutParams().width = 2*distance;
+        textView.setText(Integer.toString(distance));
+    }
+
+
+
+    //OLD *BAD* CODE FOR SCALING IMAGES:
+    /*
+    public void resizeCenterIndicator(View view, int distance){
+        int newHeight = distance; //apply math
+        int newWidth = 2*distance; // apply math
+
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.center_indicator);
+        ImageView imageView = (ImageView) findViewById(R.id.center_indicator_image);
+        TextView textView = (TextView) findViewById(R.id.center_indicator_value);
+
+        StreamActivity.resize(view, textView, imageView, bitmap, newHeight, newWidth, distance);
+    }
+
+    public static void resize(View view, TextView textView, ImageView imageView, Bitmap bitmap, int newHeight, int newWidth, int distance){
+
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
 
         Matrix matrix = new Matrix();
 
-        float scaleWidth = ((float) newWidth) / width; /*replace width + test with desired height*/
+        float scaleWidth = ((float) newWidth) / width;
         float scaleHeight = ((float) newHeight) / height;
 
         matrix.postScale(scaleWidth, scaleHeight);
 
-        Bitmap resizedBitmap = Bitmap.createBitmap(indicator, 0, 0, width, height, matrix, true);
-        ImageView im = (ImageView) findViewById(R.id.left_indicator_image);
-        im.setImageBitmap(resizedBitmap);
+        Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+        imageView.setImageBitmap(resizedBitmap);
 
-        TextView textView = (TextView) findViewById(R.id.left_indicator_value);
-        textView.setText(Integer.toString(newHeight));
-    }
+        textView.setText(Integer.toString(distance));
+    }*/
 
 }
