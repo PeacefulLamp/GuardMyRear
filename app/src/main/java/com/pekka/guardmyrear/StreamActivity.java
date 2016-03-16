@@ -150,7 +150,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         m_notifyman = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         Uri snd = NotificationCenter.GetRingtone();
-        NotificationCenter.PingNotification(m_notifyman,context,snd,"Guard My Rear","Someone is at your rear!");
+        NotificationCenter.PingNotification(m_notifyman, context, snd, "Guard My Rear", "Someone is at your rear!");
     }
 
     @Override
@@ -263,15 +263,16 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     }
 
 
+
+
     //Method to test resize
     int i = 200;
-    public void resizeImage(Activity view){
+    public void resizeImage(View view){
         i += 5;
-        resizeLeftIndicator(view, i);
-        resizeRightIndicator(view, i);
-        resizeCenterIndicator(view, i);
+        resizeLeftIndicator(this, i);
+        resizeRightIndicator(this, i);
+        resizeCenterIndicator(this, i);
     }
-
 
     public static void resizeLeftIndicator(Activity view, int distance){
         ImageView imageView = (ImageView) view.findViewById(R.id.left_indicator_image);
