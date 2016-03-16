@@ -1,9 +1,11 @@
 package com.pekka.guardmyrear;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -47,9 +49,17 @@ public class NewLayoutActivity extends AppCompatActivity {
     }
 
     public void startStreamActivity(View view){
-        System.out.println("sdlfkjsflkj");
-        Intent a = new Intent(this,StreamActivity.class);
-        a.putExtra(getResources().getString(R.string.stream_resource),"http://192.168.42.1:8554/stream");
-        startActivity(a);
+        WifiManager wman = (WifiManager)getApplicationContext()
+                .getSystemService(Context.WIFI_SERVICE);
+
+        if(!WifiStuff.ConnectNetwork(wman,"gmr","helloworld"))
+        {
+            Snackbar nice = Snackbar.make(findViewById(R.id.toolbar), R.string.wifi_error_message, Snackbar.LENGTH_LONG);
+            nice.show();
+        }else {
+            Intent a = new Intent(this, StreamActivity.class);
+            a.putExtra(getResources().getString(R.string.stream_resource), "http://192.168.42.1:8554/stream");
+            startActivity(a);
+        }
     }
 }
