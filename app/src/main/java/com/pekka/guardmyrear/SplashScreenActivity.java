@@ -28,7 +28,7 @@ public class SplashScreenActivity extends Activity{
             public void run() {
                 // Run will execute when time has run out
                 // Then switch to main menu
-                Intent i = new Intent(SplashScreenActivity.this, StreamActivity.class);
+                Intent i = new Intent(SplashScreenActivity.this, NewLayoutActivity.class);
                 startActivity(i);
 
                 // close the splashscreenactivity
