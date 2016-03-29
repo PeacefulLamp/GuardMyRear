@@ -134,34 +134,152 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         client.disconnect();
     }
 
-    private class SensorThread extends Thread{
-        private DatagramSocket m_socket;
-        private Activity m_view;
+    /**The following class just stores a data_string outside the UI-thread
+     * so that the network thread can update the data string at the same time
+     * as the graphics thead updates the layout (it takes time to scale the images)
+     */
 
-        public SensorThread(DatagramSocket socket, Activity activity){
-            m_socket = socket;
-            m_view = activity;
+    public class DataThread extends  Thread{
+        public String data_string;
+
+        public void run(){
+            data_string = "{\"key1\":0, \"key2\":0, \"key3\":0}"; //lazy quick fix to avoid null-pointer error in parseJSON method
+        }
+    }
+
+
+    /**
+     * the following class, when it is ready to do so,
+     * reads the latest sensor data, does some calculations,
+     * and updates the layout for the sensor indicators
+     */
+
+    public class GraphicsThread extends Thread{
+
+        StreamActivity m_activity;
+        DataThread dataThread;
+        String data_string;
+
+
+        public GraphicsThread(StreamActivity activity, DataThread thread){
+            m_activity = activity;
+            dataThread = thread;
+        }
+
+        @Override
+        public void run(){
+            while (true){
+
+                try {
+                    Thread.sleep((long) 100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                data_string = dataThread.data_string;
+
+                JSONObject js = parseJSON(data_string);
+                final double[] dMan = Sensorize(js);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        resizeLeftIndicator((int) dMan[0]);
+                        resizeCenterIndicator((int) dMan[1]);
+                        resizeRightIndicator((int) dMan[2]);
+                    }
+                });
+            }
+        }
+
+        //Parse JSON string
+        private JSONObject parseJSON(String s) {
+            JSONObject jsonObject = null;
+
+            try {
+                jsonObject = new JSONObject(s);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return jsonObject;
+        }
+
+        private double[] Sensorize(JSONObject jsonObject) {
+
+            double sensor1 = 0;
+            double sensor2 = 0;
+            double sensor3 = 0;
+
+            try {
+                sensor1 = jsonObject.getDouble("key1");
+                sensor2 = jsonObject.getDouble("key2");
+                sensor3 = jsonObject.getDouble("key3");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            //do math here
+
+            return new double[]{sensor1, sensor2, sensor3};
+        }
+    }
+
+    /**
+     * what the following class is doing is that it captures the datagram, and updates
+     * the sensor data string, so that the graphics thread can work at its own pace.
+     *
+     */
+
+    private class SensorThread extends Thread{
+        DatagramSocket m_socket;
+        DataThread dataThread;
+
+        public SensorThread(DataThread thread) throws SocketException {
+            dataThread = thread;
+            m_socket = new DatagramSocket(5005);  //the port number might be useful to keep outside the class
         }
 
         public void run(){
 
             while (true){
-                final String data = SocketListen(m_socket); //stop and listen for datagram
 
+                final String data = SocketListen(m_socket);
+                //System.out.println(data);
 
+                dataThread.data_string = data; //Because the graphics thread is blocking the UI-thread when updating the layout
+
+                /*
                 //run anything you want on the UI-thread
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        JSONObject js = parseJSON(data);
-                        Sensorize(m_view, js); //pass activity down the rabbit hole
+
                     }
                 });
+                */
             }
 
         }
+        /**
+         * Listening to UDP multicast and receiving sensor packets
+         */
+        private String SocketListen(DatagramSocket s) {
+            byte[] data = new byte[4096];
+            DatagramPacket p = new DatagramPacket(data, data.length);
+            try {
+                s.receive(p);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (p.getLength() > 0) {
+                return new String(Arrays.copyOf(data, p.getLength()));
+            }
+            return null;
+        }
+
     }
 
+    /*
     private class SensorTask extends TimerTask {
         private DatagramSocket m_socket;
         private Activity m_view;
@@ -174,19 +292,17 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         @Override
         public void run() {
             final String data = SocketListen(m_socket);
-            System.out.println();
-            System.out.println(data);
-            System.out.println();
 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    JSONObject js = parseJSON(data);
-                    Sensorize(m_view, js);
+                    //JSONObject js = parseJSON(data);
+                    //Sensorize(m_view, js);
                 }
             });
         }
     }
+    */
 
     /**
      * #########################################
@@ -230,20 +346,26 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         view.loadUrl(getIntent().getStringExtra(getResources().getString(R.string.stream_resource)));
 
         try {
-            m_data_socket = new DatagramSocket(5005);
-
-            /** SensorTask virker som den skal nå, men det er
-             * kanskje bedre å time datagram'ene fra PI-siden??
-             */
 
             //TimerTask check_task = new SensorTask(this, m_data_socket);
             //m_data_timer = new Timer("Data Timer");
             //m_data_timer.scheduleAtFixedRate(check_task, 100, 100);
 
-            SensorThread sensorThread = new SensorThread(m_data_socket, this);
+
+            /**
+             * There is a problem that the socket, and threads are tied to the lifetime of the StreamActivity
+             * when rotating the phone, onCreate is called again, and we probably get some socket-exception (not tested)
+             * which might have some quick fix, but we should investigate on how to get everything running in the background
+             */
+
+            DataThread dataThread = new DataThread();
+            dataThread.start();
+
+            SensorThread sensorThread = new SensorThread(dataThread);
             sensorThread.start();
 
-            System.out.println("Created UDP multicast listener");
+            GraphicsThread graphicsThread = new GraphicsThread(this, dataThread);
+            graphicsThread.start();
 
         } catch (SocketException e) {
             System.out.println("this is just a line of text");
@@ -318,88 +440,27 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
 
-    /**
-     * Listening to UDP multicast and receiving sensor packets
-     */
-    private static String SocketListen(DatagramSocket s) {
-        byte[] data = new byte[4096];
-        DatagramPacket p = new DatagramPacket(data, data.length);
-        try {
-            s.receive(p);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (p.getLength() > 0) {
-            return new String(Arrays.copyOf(data, p.getLength()));
-        }
-        return null;
-    }
 
-    //Parse JSON string
-    private static JSONObject parseJSON(String s) {
-        JSONObject jsonObject = null;
-
-        try {
-            jsonObject = new JSONObject(s);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return jsonObject;
-    }
-
-    private static void Sensorize(Activity view, JSONObject jsonObject) {
-
-        System.out.println("Seinsorizing...");
-
-        double sensor1 = 0;
-        double sensor2 = 0;
-        double sensor3 = 0;
-
-        try {
-            sensor1 = jsonObject.getDouble("key1");
-            sensor2 = jsonObject.getDouble("key2");
-            sensor3 = jsonObject.getDouble("key3");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        //do math here
-
-        resizeLeftIndicator(view, (int) sensor1);
-        resizeRightIndicator(view, (int) sensor2);
-        resizeCenterIndicator(view, (int) sensor3);
-    }
-
-
-    //Method to test resize
-    int i = 200;
-
-    public void resizeImage(View view) {
-        i += 5;
-        resizeLeftIndicator(this, i);
-        resizeRightIndicator(this, i);
-        resizeCenterIndicator(this, i);
-    }
-
-    public static void resizeLeftIndicator(Activity view, int distance) {
-        ImageView imageView = (ImageView) view.findViewById(R.id.left_indicator_image);
-        TextView textView = (TextView) view.findViewById(R.id.left_indicator_value);
+    public void resizeLeftIndicator(int distance) {
+        ImageView imageView = (ImageView) findViewById(R.id.left_indicator_image);
+        TextView textView = (TextView) findViewById(R.id.left_indicator_value);
         imageView.getLayoutParams().height = distance;
         imageView.getLayoutParams().width = distance;
         textView.setText(Integer.toString(distance));
     }
 
-    public static void resizeRightIndicator(Activity view, int distance) {
-        ImageView imageView = (ImageView) view.findViewById(R.id.right_indicator_image);
-        TextView textView = (TextView) view.findViewById(R.id.right_indicator_value);
+    public void resizeRightIndicator(int distance) {
+        ImageView imageView = (ImageView) findViewById(R.id.right_indicator_image);
+        TextView textView = (TextView) findViewById(R.id.right_indicator_value);
         imageView.getLayoutParams().height = distance;
         imageView.getLayoutParams().width = distance;
         textView.setText(Integer.toString(distance));
     }
 
-    public static void resizeCenterIndicator(Activity view, int distance) {
-        ImageView imageView = (ImageView) view.findViewById(R.id.center_indicator_image);
-        TextView textView = (TextView) view.findViewById(R.id.center_indicator_value);
+    public void resizeCenterIndicator(int distance) {
+        ImageView imageView = (ImageView)
+                findViewById(R.id.center_indicator_image);
+        TextView textView = (TextView) findViewById(R.id.center_indicator_value);
         imageView.getLayoutParams().height = distance;
         imageView.getLayoutParams().width = 2 * distance;
         textView.setText(Integer.toString(distance));
