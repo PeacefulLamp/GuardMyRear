@@ -4,8 +4,13 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.provider.ContactsContract;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,6 +19,10 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,36 +81,124 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         }
     };
 
-    /** Sensor data */
+    /**
+     * Sensor data
+     */
     private DatagramSocket m_data_socket;
     private Timer m_data_timer;
 
     private NotificationManager m_notifyman;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
-    private class SensorTask extends TimerTask
-    {
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Stream Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.pekka.guardmyrear/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Stream Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.pekka.guardmyrear/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
+    }
+
+    private class SensorThread extends Thread{
         private DatagramSocket m_socket;
         private Activity m_view;
-        public SensorTask(Activity view, DatagramSocket socket)
-        {
+
+        public SensorThread(DatagramSocket socket, Activity activity){
+            m_socket = socket;
+            m_view = activity;
+        }
+
+        public void run(){
+
+            while (true){
+                final String data = SocketListen(m_socket); //stop and listen for datagram
+
+
+                //run anything you want on the UI-thread
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        JSONObject js = parseJSON(data);
+                        Sensorize(m_view, js); //pass activity down the rabbit hole
+                    }
+                });
+            }
+
+        }
+    }
+
+    private class SensorTask extends TimerTask {
+        private DatagramSocket m_socket;
+        private Activity m_view;
+
+        public SensorTask(Activity view, DatagramSocket socket) {
             m_socket = socket;
             m_view = view;
         }
+
         @Override
         public void run() {
-            String data = SocketListen(m_socket);
-            JSONObject js = parseJSON(data);
-            //Sensorize(m_view,js);
+            final String data = SocketListen(m_socket);
+            System.out.println();
+            System.out.println(data);
+            System.out.println();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject js = parseJSON(data);
+                    Sensorize(m_view, js);
+                }
+            });
         }
     }
 
     /**
-
-    _______________ON        CREATE ____________________
-
+     * #########################################
+     * ______________ON  CREATE ________________
+     * #########################################
      **/
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        System.out.println("ON CREATE");
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_stream);
@@ -121,8 +218,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-
-        WebView view = (WebView)findViewById(R.id.webView);
+        WebView view = (WebView) findViewById(R.id.webView);
 
         view.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -135,22 +231,33 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
         try {
             m_data_socket = new DatagramSocket(5005);
-            TimerTask check_task = new SensorTask(this, m_data_socket);
-            m_data_timer = new Timer("Data Timer");
-            m_data_timer.scheduleAtFixedRate(check_task,100,100);
+
+            /** SensorTask virker som den skal nå, men det er
+             * kanskje bedre å time datagram'ene fra PI-siden??
+             */
+
+            //TimerTask check_task = new SensorTask(this, m_data_socket);
+            //m_data_timer = new Timer("Data Timer");
+            //m_data_timer.scheduleAtFixedRate(check_task, 100, 100);
+
+            SensorThread sensorThread = new SensorThread(m_data_socket, this);
+            sensorThread.start();
 
             System.out.println("Created UDP multicast listener");
 
-        }catch(SocketException e)
-        {
+        } catch (SocketException e) {
+            System.out.println("this is just a line of text");
             e.printStackTrace();
         }
 
         Context context = getApplicationContext();
-        m_notifyman = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        m_notifyman = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         Uri snd = NotificationCenter.GetRingtone();
         NotificationCenter.PingNotification(m_notifyman, context, snd, "Guard My Rear", "Someone is at your rear!");
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -216,21 +323,20 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
      */
     private static String SocketListen(DatagramSocket s) {
         byte[] data = new byte[4096];
-        DatagramPacket p = new DatagramPacket(data,data.length);
+        DatagramPacket p = new DatagramPacket(data, data.length);
         try {
             s.receive(p);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if(p.getLength()>0)
-        {
-            return new String(Arrays.copyOf(data,p.getLength()));
+        if (p.getLength() > 0) {
+            return new String(Arrays.copyOf(data, p.getLength()));
         }
         return null;
     }
 
     //Parse JSON string
-    private static JSONObject parseJSON(String s){
+    private static JSONObject parseJSON(String s) {
         JSONObject jsonObject = null;
 
         try {
@@ -241,7 +347,9 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         return jsonObject;
     }
 
-    private static void Sensorize(Activity view, JSONObject jsonObject){
+    private static void Sensorize(Activity view, JSONObject jsonObject) {
+
+        System.out.println("Seinsorizing...");
 
         double sensor1 = 0;
         double sensor2 = 0;
@@ -263,25 +371,25 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     }
 
 
-
-
     //Method to test resize
     int i = 200;
-    public void resizeImage(View view){
+
+    public void resizeImage(View view) {
         i += 5;
         resizeLeftIndicator(this, i);
         resizeRightIndicator(this, i);
         resizeCenterIndicator(this, i);
     }
 
-    public static void resizeLeftIndicator(Activity view, int distance){
+    public static void resizeLeftIndicator(Activity view, int distance) {
         ImageView imageView = (ImageView) view.findViewById(R.id.left_indicator_image);
         TextView textView = (TextView) view.findViewById(R.id.left_indicator_value);
         imageView.getLayoutParams().height = distance;
         imageView.getLayoutParams().width = distance;
         textView.setText(Integer.toString(distance));
     }
-    public static void resizeRightIndicator(Activity view, int distance){
+
+    public static void resizeRightIndicator(Activity view, int distance) {
         ImageView imageView = (ImageView) view.findViewById(R.id.right_indicator_image);
         TextView textView = (TextView) view.findViewById(R.id.right_indicator_value);
         imageView.getLayoutParams().height = distance;
@@ -289,11 +397,12 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         textView.setText(Integer.toString(distance));
     }
 
-    public static void resizeCenterIndicator(Activity view, int distance){
+    public static void resizeCenterIndicator(Activity view, int distance) {
         ImageView imageView = (ImageView) view.findViewById(R.id.center_indicator_image);
         TextView textView = (TextView) view.findViewById(R.id.center_indicator_value);
         imageView.getLayoutParams().height = distance;
-        imageView.getLayoutParams().width = 2*distance;
+        imageView.getLayoutParams().width = 2 * distance;
         textView.setText(Integer.toString(distance));
     }
 }
+
