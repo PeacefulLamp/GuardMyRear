@@ -3,9 +3,13 @@ package com.pekka.guardmyrear;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -81,6 +85,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
      */
     private DatagramSocket m_data_socket;
     private Timer m_data_timer;
+    BroadcastReceiver receiver;
 
     private NotificationManager m_notifyman;
     /**
@@ -92,6 +97,10 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     @Override
     public void onStart() {
         super.onStart();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver((receiver),
+                new IntentFilter("result")
+        );
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -111,6 +120,8 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
     @Override
     public void onStop() {
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         super.onStop();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -129,6 +140,8 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         client.disconnect();
     }
 
+
+    /*
     /**
      * The following class stores the sensor values in an object to share between threads
      */
@@ -139,101 +152,6 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         public DataObject(){
             data_string = "{\"key1\":0, \"key2\":0, \"key3\":0}"; //lazy quick fix to avoid null-pointer error in parseJSON method
         }
-    }
-
-
-    /**
-     * the following class, when it is ready to do so,
-     * reads the latest sensor data, does some calculations,
-     * and updates the layout for the sensor indicators
-     */
-
-    public class GraphicsThread extends Thread{
-
-        StreamActivity m_activity;
-        DataObject dataObject;
-        String data_string;
-        Handler UI_handler;
-
-
-        public GraphicsThread(StreamActivity activity, DataObject object, Handler handler){
-            m_activity = activity;
-            dataObject = object;
-            UI_handler = handler;
-        }
-
-        @Override
-        public void run(){
-            while (true){
-
-                try {
-                    Thread.sleep((long) 100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                data_string = dataObject.data_string;
-
-                JSONObject js = parseJSON(data_string);
-                final double[] dMan = Sensorize(js);
-
-                UI_handler.post(new Runnable(){
-                    public void run(){
-                        //do stuff on the UI-thread
-                        resizeLeftIndicator((int) dMan[0]);
-                        resizeCenterIndicator((int) dMan[1]);
-                        resizeRightIndicator((int) dMan[2]);
-                    }
-                });
-            }
-        }
-    }
-
-    /**
-     * what the following class is doing is that it captures the datagram, and updates
-     * the sensor data string, so that the graphics thread can work at its own pace.
-     *
-     */
-
-    private class SensorThread extends Thread{
-        DatagramSocket m_socket;
-        DataObject dataObject;
-
-        public SensorThread(DataObject object){
-            dataObject = object;
-            try {
-                m_socket = new DatagramSocket(5005);  //the port number might be useful to keep outside the class
-            } catch (SocketException e) {
-                e.printStackTrace();
-            }
-        }
-
-        public void run(){
-
-            while (true){
-                final String data = SocketListen(m_socket);
-                //System.out.println(data);
-
-                dataObject.data_string = data; //Update the sensor data
-            }
-
-        }
-        /**
-         * Listening to UDP multicast and receiving sensor packets
-         */
-        private String SocketListen(DatagramSocket s) {
-            byte[] data = new byte[4096];
-            DatagramPacket p = new DatagramPacket(data, data.length);
-            try {
-                s.receive(p);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (p.getLength() > 0) {
-                return new String(Arrays.copyOf(data, p.getLength()));
-            }
-            return null;
-        }
-
     }
 
     /*
@@ -268,13 +186,33 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
      **/
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-
-        System.out.println("ON CREATE");
+    public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        super.setContentView(R.layout.activity_stream);
 
-        setContentView(R.layout.activity_stream);
+
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String s = intent.getStringExtra("message");
+                // do something here.
+                System.out.println(s);
+
+
+                String data_string = s;
+                JSONObject js = parseJSON(data_string);
+                final double[] dMan = Sensorize(js);
+
+                resizeLeftIndicator((int) dMan[0]);
+                resizeCenterIndicator((int) dMan[1]);
+                resizeRightIndicator((int) dMan[2]);
+
+            }
+        };
+
+        System.out.println("ON CREATE");
 
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
@@ -312,16 +250,6 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
          * some socket-exception (not tested) which might have some quick fix, but we should
          * investigate on how to get everything running in the background
          */
-
-        Handler handler = new Handler(); //handler is now bound to this thread (the UI-thread)
-
-        DataObject dataObject = new DataObject();
-
-        SensorThread sensorThread = new SensorThread(dataObject);
-        sensorThread.start();
-
-        GraphicsThread graphicsThread = new GraphicsThread(this, dataObject, handler);
-        graphicsThread.start();
 
         Context context = getApplicationContext();
         m_notifyman = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
