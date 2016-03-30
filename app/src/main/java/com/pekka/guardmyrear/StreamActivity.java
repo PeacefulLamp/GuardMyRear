@@ -4,13 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.hardware.SensorManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.provider.ContactsContract;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -134,15 +129,14 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         client.disconnect();
     }
 
-    /**The following class just stores a data_string outside the UI-thread
-     * so that the network thread can update the data string at the same time
-     * as the graphics thead updates the layout (it takes time to scale the images)
+    /**
+     * The following class stores the sensor values in an object to share between threads
      */
 
-    public class DataThread extends  Thread{
+    public class DataObject{
         public String data_string;
 
-        public void run(){
+        public DataObject(){
             data_string = "{\"key1\":0, \"key2\":0, \"key3\":0}"; //lazy quick fix to avoid null-pointer error in parseJSON method
         }
     }
@@ -157,13 +151,15 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     public class GraphicsThread extends Thread{
 
         StreamActivity m_activity;
-        DataThread dataThread;
+        DataObject dataObject;
         String data_string;
+        Handler UI_handler;
 
 
-        public GraphicsThread(StreamActivity activity, DataThread thread){
+        public GraphicsThread(StreamActivity activity, DataObject object, Handler handler){
             m_activity = activity;
-            dataThread = thread;
+            dataObject = object;
+            UI_handler = handler;
         }
 
         @Override
@@ -175,52 +171,20 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                data_string = dataThread.data_string;
+                data_string = dataObject.data_string;
 
                 JSONObject js = parseJSON(data_string);
                 final double[] dMan = Sensorize(js);
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
+                UI_handler.post(new Runnable(){
+                    public void run(){
+                        //do stuff on the UI-thread
                         resizeLeftIndicator((int) dMan[0]);
                         resizeCenterIndicator((int) dMan[1]);
                         resizeRightIndicator((int) dMan[2]);
                     }
                 });
             }
-        }
-
-        //Parse JSON string
-        private JSONObject parseJSON(String s) {
-            JSONObject jsonObject = null;
-
-            try {
-                jsonObject = new JSONObject(s);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return jsonObject;
-        }
-
-        private double[] Sensorize(JSONObject jsonObject) {
-
-            double sensor1 = 0;
-            double sensor2 = 0;
-            double sensor3 = 0;
-
-            try {
-                sensor1 = jsonObject.getDouble("key1");
-                sensor2 = jsonObject.getDouble("key2");
-                sensor3 = jsonObject.getDouble("key3");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            //do math here
-
-            return new double[]{sensor1, sensor2, sensor3};
         }
     }
 
@@ -232,31 +196,24 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
     private class SensorThread extends Thread{
         DatagramSocket m_socket;
-        DataThread dataThread;
+        DataObject dataObject;
 
-        public SensorThread(DataThread thread) throws SocketException {
-            dataThread = thread;
-            m_socket = new DatagramSocket(5005);  //the port number might be useful to keep outside the class
+        public SensorThread(DataObject object){
+            dataObject = object;
+            try {
+                m_socket = new DatagramSocket(5005);  //the port number might be useful to keep outside the class
+            } catch (SocketException e) {
+                e.printStackTrace();
+            }
         }
 
         public void run(){
 
             while (true){
-
                 final String data = SocketListen(m_socket);
                 //System.out.println(data);
 
-                dataThread.data_string = data; //Because the graphics thread is blocking the UI-thread when updating the layout
-
-                /*
-                //run anything you want on the UI-thread
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                    }
-                });
-                */
+                dataObject.data_string = data; //Update the sensor data
             }
 
         }
@@ -345,32 +302,26 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
         view.loadUrl(getIntent().getStringExtra(getResources().getString(R.string.stream_resource)));
 
-        try {
+        //TimerTask check_task = new SensorTask(this, m_data_socket);
+        //m_data_timer = new Timer("Data Timer");
+        //m_data_timer.scheduleAtFixedRate(check_task, 100, 100);
 
-            //TimerTask check_task = new SensorTask(this, m_data_socket);
-            //m_data_timer = new Timer("Data Timer");
-            //m_data_timer.scheduleAtFixedRate(check_task, 100, 100);
+        /**
+         * There is a problem that the socket, and threads are tied to the lifetime of the
+         * StreamActivity. When rotating the phone, onCreate is called again, and we probably get
+         * some socket-exception (not tested) which might have some quick fix, but we should
+         * investigate on how to get everything running in the background
+         */
 
+        Handler handler = new Handler(); //handler is now bound to this thread (the UI-thread)
 
-            /**
-             * There is a problem that the socket, and threads are tied to the lifetime of the StreamActivity
-             * when rotating the phone, onCreate is called again, and we probably get some socket-exception (not tested)
-             * which might have some quick fix, but we should investigate on how to get everything running in the background
-             */
+        DataObject dataObject = new DataObject();
 
-            DataThread dataThread = new DataThread();
-            dataThread.start();
+        SensorThread sensorThread = new SensorThread(dataObject);
+        sensorThread.start();
 
-            SensorThread sensorThread = new SensorThread(dataThread);
-            sensorThread.start();
-
-            GraphicsThread graphicsThread = new GraphicsThread(this, dataThread);
-            graphicsThread.start();
-
-        } catch (SocketException e) {
-            System.out.println("this is just a line of text");
-            e.printStackTrace();
-        }
+        GraphicsThread graphicsThread = new GraphicsThread(this, dataObject, handler);
+        graphicsThread.start();
 
         Context context = getApplicationContext();
         m_notifyman = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -438,6 +389,37 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    //Parse JSON string
+    public static JSONObject parseJSON(String s) {
+        JSONObject jsonObject = null;
+
+        try {
+            jsonObject = new JSONObject(s);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
+
+    public static double[] Sensorize(JSONObject jsonObject) {
+
+        double sensor1 = 0;
+        double sensor2 = 0;
+        double sensor3 = 0;
+
+        try {
+            sensor1 = jsonObject.getDouble("key1");
+            sensor2 = jsonObject.getDouble("key2");
+            sensor3 = jsonObject.getDouble("key3");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //do math here
+
+        return new double[]{sensor1, sensor2, sensor3};
     }
 
 
