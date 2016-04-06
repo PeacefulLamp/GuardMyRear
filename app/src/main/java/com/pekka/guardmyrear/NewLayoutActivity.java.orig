@@ -20,20 +20,21 @@ import android.view.View;
 import android.widget.ImageButton;
 
 public class NewLayoutActivity extends AppCompatActivity {
-
     ImageButton connectButton;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_layout);
 
-        connectButton = (ImageButton) findViewById(R.id.connectButton);
-
+<<<<<<< HEAD
         /**
          * Start sensor service running in background, where broadcast activity
          *  is performed. Receives JSON values.
          */
+=======
+        connectButton = (ImageButton) findViewById(R.id.connectButton);
+
+>>>>>>> master
         Intent intent = new Intent(this, SensorizingService.class);
         startService(intent);
 
@@ -68,6 +69,9 @@ public class NewLayoutActivity extends AppCompatActivity {
      *  if necessary.
      */
     public void startStreamActivity(View view){
+<<<<<<< HEAD
+        /* Test if the user is connected to WiFi */
+=======
         connectButton.setColorFilter(Color.argb(100, 0, 0, 0));
 
         new CountDownTimer(1000, 1000){
@@ -79,7 +83,7 @@ public class NewLayoutActivity extends AppCompatActivity {
             }
         }.start();
 
-        /* Test if the user is connected to WiFi */
+>>>>>>> master
         WifiManager wman = (WifiManager) getApplicationContext()
                 .getSystemService(Context.WIFI_SERVICE);
 

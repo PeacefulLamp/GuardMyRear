@@ -12,14 +12,29 @@
     tools:context="com.pekka.guardmyrear.NewLayoutActivity"
     tools:showIn="@layout/activity_new_layout">
 
-    <Button
-        android:layout_width="100pt"
-        android:layout_height="100pt"
+    <ImageButton
+        android:layout_width="130pt"
+        android:layout_height="130pt"
 
         android:text="Connect"
 
-        android:id="@+id/button"
+        android:id="@+id/connectButton"
+        android:onClick="startStreamActivity"
+        android:src="@drawable/camera"
+        android:scaleType="fitCenter"
+        android:background="@null"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:onClick="startStreamActivity"/>
+        android:filterTouchesWhenObscured="false"
+        android:clickable="false" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Connect to Pi"
+        android:id="@+id/textView2"
+        android:layout_alignBottom="@+id/connectButton"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>
