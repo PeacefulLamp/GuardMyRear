@@ -32,7 +32,7 @@ public class SplashScreenActivity extends Activity{
                 startActivity(i);
 
                 // close the splashscreenactivity
-                finish();
+                SplashScreenActivity.this.finish();
             }
         }, TIME_OUT);
     }

@@ -17,4 +17,5 @@
     <string name="title_activity_new_layout">GUARD MY REAR</string>
 
     <string name="wifi_error_message">Failed to connect to WiFi network!</string>
+    <string name="GMRTitleText">GMR</string>
 </resources>
