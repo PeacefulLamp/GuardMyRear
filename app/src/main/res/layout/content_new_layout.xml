@@ -13,8 +13,8 @@
     tools:showIn="@layout/activity_new_layout">
 
     <ImageButton
-        android:layout_width="125pt"
-        android:layout_height="125pt"
+        android:layout_width="130pt"
+        android:layout_height="130pt"
 
         android:text="Connect"
 
