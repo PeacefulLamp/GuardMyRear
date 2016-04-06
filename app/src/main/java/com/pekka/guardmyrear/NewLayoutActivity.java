@@ -2,12 +2,14 @@ package com.pekka.guardmyrear;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -15,13 +17,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 
 public class NewLayoutActivity extends AppCompatActivity {
-
+    ImageButton connectButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_layout);
+
+        connectButton = (ImageButton) findViewById(R.id.connectButton);
 
         Intent intent = new Intent(this, SensorizingService.class);
         startService(intent);
@@ -53,6 +58,17 @@ public class NewLayoutActivity extends AppCompatActivity {
     }
 
     public void startStreamActivity(View view){
+        connectButton.setColorFilter(Color.argb(100, 0, 0, 0));
+
+        new CountDownTimer(1000, 1000){
+            public void onFinish(){
+                connectButton.setColorFilter(Color.argb(0, 0, 0, 0));
+            }
+
+            public void onTick(long millisUntilFinished){
+            }
+        }.start();
+
         WifiManager wman = (WifiManager) getApplicationContext()
                 .getSystemService(Context.WIFI_SERVICE);
 
