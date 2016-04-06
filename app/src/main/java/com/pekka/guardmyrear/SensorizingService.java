@@ -18,6 +18,8 @@ import java.net.SocketException;
 import java.util.Arrays;
 
 public class SensorizingService extends Service {
+    LocalBroadcastManager broadcaster;
+
     /**
      * The following class stores the sensor values in an object to share between threads
      */
@@ -59,6 +61,7 @@ public class SensorizingService extends Service {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
                 data_string = dataObject.data_string;
 
                 UI_handler.post(new Runnable(){
@@ -90,6 +93,8 @@ public class SensorizingService extends Service {
         }
 
         public void run(){
+
+            System.out.println("Worker thread has started");
 
             while (true){
                 //TODO: Use timer to preserve battery
@@ -132,9 +137,6 @@ public class SensorizingService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
-
-
-    LocalBroadcastManager broadcaster;
 
     public void sendResult(String message) {
         Intent intent = new Intent("result");

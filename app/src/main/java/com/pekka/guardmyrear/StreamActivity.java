@@ -31,6 +31,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class StreamActivity extends AppCompatActivity {
+    BroadcastReceiver receiver;
+    private NotificationManager m_notifyman;
+    private boolean mVisible;
 
     /**
      * Some older devices needs a small delay between UI widget updates
@@ -68,20 +71,12 @@ public class StreamActivity extends AppCompatActivity {
             mControlsView.setVisibility(View.VISIBLE);
         }
     };
-    private boolean mVisible;
     private final Runnable mHideRunnable = new Runnable() {
         @Override
         public void run() {
             hide();
         }
     };
-
-    /**
-     * Sensor data
-     */
-    BroadcastReceiver receiver;
-
-    private NotificationManager m_notifyman;
 
     /*
     /**
@@ -104,7 +99,6 @@ public class StreamActivity extends AppCompatActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         super.setContentView(R.layout.activity_stream);
 
@@ -120,19 +114,19 @@ public class StreamActivity extends AppCompatActivity {
                 /* Get JSON string from worker thread */
                 String s = intent.getStringExtra("message");
 
-                System.out.println(s);
-
                 /* Parse the JSON string and get sensor values */
                 JSONObject js = SensorHandling.parseJSON(s);
                 final double[] dMan = SensorHandling.Sensorize(js);
 
                 /* Apply the sensor values to the UI widgets */
                 resizeLeftIndicator((int) dMan[0]);
-                resizeCenterIndicator((int) dMan[1]);
-                resizeRightIndicator((int) dMan[2]);
+                resizeCenterIndicator((int) dMan[0]);
+                resizeRightIndicator((int) dMan[0]);
 
             }
         };
+        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
+        broadcastManager.registerReceiver(receiver,new IntentFilter("result"));
 
         System.out.println("ON CREATE");
 
@@ -174,6 +168,7 @@ public class StreamActivity extends AppCompatActivity {
 
         Uri snd = NotificationCenter.GetRingtone();
         NotificationCenter.PingNotification(m_notifyman, context, snd, "Guard My Rear", "Someone is at your rear!");
+
     }
 
     /**
@@ -249,26 +244,32 @@ public class StreamActivity extends AppCompatActivity {
     public void resizeLeftIndicator(int distance) {
         ImageView imageView = (ImageView) findViewById(R.id.left_indicator_image);
         TextView textView = (TextView) findViewById(R.id.left_indicator_value);
-        imageView.getLayoutParams().height = distance;
-        imageView.getLayoutParams().width = distance;
-        textView.setText(Integer.toString(distance));
+        resizeIndicator(imageView,textView,distance,false);
     }
 
     public void resizeRightIndicator(int distance) {
         ImageView imageView = (ImageView) findViewById(R.id.right_indicator_image);
         TextView textView = (TextView) findViewById(R.id.right_indicator_value);
-        imageView.getLayoutParams().height = distance;
-        imageView.getLayoutParams().width = distance;
-        textView.setText(Integer.toString(distance));
+        resizeIndicator(imageView,textView,distance,false);
     }
 
     public void resizeCenterIndicator(int distance) {
         ImageView imageView = (ImageView)
                 findViewById(R.id.center_indicator_image);
         TextView textView = (TextView) findViewById(R.id.center_indicator_value);
+        resizeIndicator(imageView,textView,distance,true);
+    }
+
+    public void resizeIndicator(ImageView imageView, TextView textView, int distance,boolean l)
+    {
+        System.out.println("Resized: "+distance);
         imageView.getLayoutParams().height = distance;
-        imageView.getLayoutParams().width = 2 * distance;
-        textView.setText(Integer.toString(distance));
+        if(l)
+            imageView.getLayoutParams().width = distance;
+        else
+            imageView.getLayoutParams().width = 2*distance;
+        if(textView!=null)
+            textView.setText(Integer.toString(distance));
     }
 }
 

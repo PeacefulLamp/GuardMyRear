@@ -30,9 +30,10 @@ public class SensorHandling {
      */
     public static double FilterSensorValue(double v)
     {
+        /*WARNING: MAGIC COOKIES INBOUND */
         if(v>0)
-            return Math.min(1 / v, 500);
-        return 0;
+            return Math.max(Math.min(1 / v, 500)*40000,1);
+        return 1;
     }
 
     /**

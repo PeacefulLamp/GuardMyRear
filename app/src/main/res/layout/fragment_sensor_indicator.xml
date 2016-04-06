@@ -6,7 +6,6 @@
 
     <!-- TODO: Update blank fragment layout -->
 
-
     <ImageView
         android:src="@drawable/left_indicator"
         android:layout_width = "1px"
