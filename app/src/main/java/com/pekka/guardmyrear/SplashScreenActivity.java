@@ -10,6 +10,7 @@ import android.os.Handler;
  */
 public class SplashScreenActivity extends Activity{
 
+    // How many ms we will display the splashscreen on startup
     private final int TIME_OUT = 3000;
 
     @Override
