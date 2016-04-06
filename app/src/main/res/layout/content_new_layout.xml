@@ -18,13 +18,15 @@
 
         android:text="Connect"
 
-        android:id="@+id/button"
+        android:id="@+id/connectButton"
         android:onClick="startStreamActivity"
         android:src="@drawable/camera"
         android:scaleType="fitCenter"
         android:background="@null"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:filterTouchesWhenObscured="false"
+        android:clickable="false" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -32,7 +34,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Connect to Pi"
         android:id="@+id/textView2"
-        android:layout_alignBottom="@+id/button"
+        android:layout_alignBottom="@+id/connectButton"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>
