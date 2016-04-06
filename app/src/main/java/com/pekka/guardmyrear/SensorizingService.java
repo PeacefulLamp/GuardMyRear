@@ -18,10 +18,6 @@ import java.net.SocketException;
 import java.util.Arrays;
 
 public class SensorizingService extends Service {
-
-
-
-
     /**
      * The following class stores the sensor values in an object to share between threads
      */
@@ -96,6 +92,7 @@ public class SensorizingService extends Service {
         public void run(){
 
             while (true){
+                //TODO: Use timer to preserve battery
                 final String data = SocketListen(m_socket);
                 //System.out.println(data);
 
@@ -107,6 +104,7 @@ public class SensorizingService extends Service {
          * Listening to UDP multicast and receiving sensor packets
          */
         private String SocketListen(DatagramSocket s) {
+            /* Read socket data from multicast UDP socket */
             byte[] data = new byte[4096];
             DatagramPacket p = new DatagramPacket(data, data.length);
             try {

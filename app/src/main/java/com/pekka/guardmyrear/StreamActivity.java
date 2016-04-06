@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class StreamActivity extends AppCompatActivity implements SensorIndicatorFragment.OnFragmentInteractionListener {
+public class StreamActivity extends AppCompatActivity {
 
     /**
      * Some older devices needs a small delay between UI widget updates
@@ -79,8 +79,6 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     /**
      * Sensor data
      */
-    private DatagramSocket m_data_socket;
-    private Timer m_data_timer;
     BroadcastReceiver receiver;
 
     private NotificationManager m_notifyman;
@@ -97,31 +95,6 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
             data_string = "{\"key1\":0, \"key2\":0, \"key3\":0}"; //lazy quick fix to avoid null-pointer error in parseJSON method
         }
     }
-
-    /*
-    private class SensorTask extends TimerTask {
-        private DatagramSocket m_socket;
-        private Activity m_view;
-
-        public SensorTask(Activity view, DatagramSocket socket) {
-            m_socket = socket;
-            m_view = view;
-        }
-
-        @Override
-        public void run() {
-            final String data = SocketListen(m_socket);
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    //JSONObject js = parseJSON(data);
-                    //Sensorize(m_view, js);
-                }
-            });
-        }
-    }
-    */
 
     /**
      * #########################################
@@ -184,10 +157,6 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
         view.loadUrl(getIntent().getStringExtra(getResources().getString(R.string.stream_resource)));
 
-        //TimerTask check_task = new SensorTask(this, m_data_socket);
-        //m_data_timer = new Timer("Data Timer");
-        //m_data_timer.scheduleAtFixedRate(check_task, 100, 100);
-
         /**
          * There is a problem that the socket, and threads are tied to the lifetime of the
          * StreamActivity. When rotating the phone, onCreate is called again, and we probably get
@@ -200,11 +169,6 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
         Uri snd = NotificationCenter.GetRingtone();
         NotificationCenter.PingNotification(m_notifyman, context, snd, "Guard My Rear", "Someone is at your rear!");
-    }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-        System.out.println(uri);
     }
 
     @Override

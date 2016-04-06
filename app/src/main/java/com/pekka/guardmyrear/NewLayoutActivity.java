@@ -23,6 +23,7 @@ public class NewLayoutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_layout);
 
+        /* Start background service for updating sensor data on screen */
         Intent intent = new Intent(this, SensorizingService.class);
         startService(intent);
 
@@ -53,6 +54,8 @@ public class NewLayoutActivity extends AppCompatActivity {
     }
 
     public void startStreamActivity(View view){
+
+        /* Test if the user is connected to WiFi */
         WifiManager wman = (WifiManager) getApplicationContext()
                 .getSystemService(Context.WIFI_SERVICE);
 
@@ -61,6 +64,7 @@ public class NewLayoutActivity extends AppCompatActivity {
 
         System.out.println(wstate.name());
 
+        /* If the user is not connected, open the WiFi settings */
         if(
                 !wman.isWifiEnabled() ||
                 (wstate != NetworkInfo.DetailedState.OBTAINING_IPADDR
@@ -68,10 +72,12 @@ public class NewLayoutActivity extends AppCompatActivity {
                         && wstate != NetworkInfo.DetailedState.SCANNING))
             startActivityForResult(new Intent(Settings.ACTION_WIFI_SETTINGS), 10);
         else
+        /* If the user is already connected, start the stream directly */
             startStream();
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        /* Check if WiFi connected */
         if(requestCode==10) {
             WifiManager wman = (WifiManager) getApplicationContext()
                     .getSystemService(Context.WIFI_SERVICE);
@@ -79,6 +85,7 @@ public class NewLayoutActivity extends AppCompatActivity {
             SupplicantState ws = wman.getConnectionInfo().getSupplicantState();
             NetworkInfo.DetailedState wstate = WifiInfo.getDetailedStateOf(ws);
 
+            /* If connection failed, pop a snackbar */
             if (wstate != NetworkInfo.DetailedState.CONNECTED) {
                 Snackbar nice = Snackbar.make(findViewById(R.id.toolbar), R.string.wifi_error_message, Snackbar.LENGTH_LONG);
                 nice.show();
@@ -89,6 +96,7 @@ public class NewLayoutActivity extends AppCompatActivity {
     }
     protected void startStream()
     {
+        /* Finally, launch the stream view with video and sensor data */
         Intent a = new Intent(this, StreamActivity.class);
         a.putExtra(getResources().getString(R.string.stream_resource), "http://192.168.42.1:8554/stream");
         startActivity(a);
