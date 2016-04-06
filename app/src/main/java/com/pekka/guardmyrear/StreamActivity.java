@@ -108,20 +108,25 @@ public class StreamActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         super.setContentView(R.layout.activity_stream);
 
-
-
+        /**
+         * This class receives JSON object data from the worker
+         *  thread which receives data from the network.
+         * Aforementioned worker is SensorizingService, which is launched
+         *  on application start.
+         */
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                /* Get JSON string from worker thread */
                 String s = intent.getStringExtra("message");
-                // do something here.
+
                 System.out.println(s);
 
+                /* Parse the JSON string and get sensor values */
+                JSONObject js = SensorHandling.parseJSON(s);
+                final double[] dMan = SensorHandling.Sensorize(js);
 
-                String data_string = s;
-                JSONObject js = parseJSON(data_string);
-                final double[] dMan = Sensorize(js);
-
+                /* Apply the sensor values to the UI widgets */
                 resizeLeftIndicator((int) dMan[0]);
                 resizeCenterIndicator((int) dMan[1]);
                 resizeRightIndicator((int) dMan[2]);
@@ -171,6 +176,10 @@ public class StreamActivity extends AppCompatActivity {
         NotificationCenter.PingNotification(m_notifyman, context, snd, "Guard My Rear", "Someone is at your rear!");
     }
 
+    /**
+     * After creating our instance, hide the system bars
+     * @param savedInstanceState
+     */
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -181,6 +190,9 @@ public class StreamActivity extends AppCompatActivity {
         delayedHide(100);
     }
 
+    /**
+     * Toggle visibility of notification bar and action bar
+     */
     private void toggle() {
         if (mVisible) {
             hide();
@@ -189,6 +201,9 @@ public class StreamActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Hide the notification bar and action bar
+     */
     private void hide() {
         // Hide UI first
         ActionBar actionBar = getSupportActionBar();
@@ -203,6 +218,9 @@ public class StreamActivity extends AppCompatActivity {
         mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
     }
 
+    /**
+     * On swipe, show notification bar and action bar again
+     */
     @SuppressLint("InlinedApi")
     private void show() {
         // Show the system bar
@@ -224,38 +242,10 @@ public class StreamActivity extends AppCompatActivity {
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
 
-    //Parse JSON string
-    public static JSONObject parseJSON(String s) {
-        JSONObject jsonObject = null;
-
-        try {
-            jsonObject = new JSONObject(s);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return jsonObject;
-    }
-
-    public static double[] Sensorize(JSONObject jsonObject) {
-
-        double sensor1 = 0;
-        double sensor2 = 0;
-        double sensor3 = 0;
-
-        try {
-            sensor1 = jsonObject.getDouble("key1");
-            sensor2 = jsonObject.getDouble("key2");
-            sensor3 = jsonObject.getDouble("key3");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        //do math here
-
-        return new double[]{sensor1, sensor2, sensor3};
-    }
-
-
+    /**
+     * Resize left circular indicator on screen, must run on GUI thread
+     * @param distance The distance to be displayed
+     */
     public void resizeLeftIndicator(int distance) {
         ImageView imageView = (ImageView) findViewById(R.id.left_indicator_image);
         TextView textView = (TextView) findViewById(R.id.left_indicator_value);

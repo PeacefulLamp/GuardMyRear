@@ -23,7 +23,10 @@ public class NewLayoutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_layout);
 
-        /* Start background service for updating sensor data on screen */
+        /**
+         * Start sensor service running in background, where broadcast activity
+         *  is performed. Receives JSON values.
+         */
         Intent intent = new Intent(this, SensorizingService.class);
         startService(intent);
 
@@ -53,8 +56,11 @@ public class NewLayoutActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void startStreamActivity(View view){
-
+    /**
+     * Invoked when user presses "Connect" button, connects to WiFi network
+     *  if necessary.
+     */
+    public void startStreamActivity(){
         /* Test if the user is connected to WiFi */
         WifiManager wman = (WifiManager) getApplicationContext()
                 .getSystemService(Context.WIFI_SERVICE);
@@ -75,6 +81,14 @@ public class NewLayoutActivity extends AppCompatActivity {
         /* If the user is already connected, start the stream directly */
             startStream();
     }
+
+    /**
+     * Receives return value from activity start when pressing "Connect"
+     * If successful, launches StreamActivity
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         /* Check if WiFi connected */

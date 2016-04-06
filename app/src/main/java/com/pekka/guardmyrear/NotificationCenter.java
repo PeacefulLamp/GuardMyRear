@@ -19,6 +19,14 @@ public class NotificationCenter {
         return RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     }
 
+    /**
+     * Pop a notification on the user's phone, tons of parameters, boilerplate
+     * @param man
+     * @param context
+     * @param rt
+     * @param title
+     * @param msg
+     */
     public static void PingNotification(
             NotificationManager man,Context context,
             Uri rt, String title,String msg) {
