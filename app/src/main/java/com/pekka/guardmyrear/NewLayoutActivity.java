@@ -60,7 +60,7 @@ public class NewLayoutActivity extends AppCompatActivity {
      * Invoked when user presses "Connect" button, connects to WiFi network
      *  if necessary.
      */
-    public void startStreamActivity(){
+    public void startStreamActivity(View view){
         /* Test if the user is connected to WiFi */
         WifiManager wman = (WifiManager) getApplicationContext()
                 .getSystemService(Context.WIFI_SERVICE);
