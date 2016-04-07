@@ -124,16 +124,20 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
                 JSONObject js = SensorHandling.parseJSON(s);
                 final double[] dMan = SensorHandling.Sensorize(js);
 
-                if(System.currentTimeMillis()%1000 < 100) {
-                    dMan[0] = Math.random() * 400;
-                    dMan[1] = Math.random() * 400;
-                    dMan[2] = Math.random() * 400;
-                    System.out.println("Values: "+dMan[0]+","+dMan[1]+","+dMan[2]);
+                //if(System.currentTimeMillis()%1000 < 100) {
+                    //dMan[0] = Math.random() * 400;
+                    //dMan[1] = Math.random() * 400;
+                    //dMan[2] = Math.random() * 400;
+                    //System.out.println("Values: "+dMan[0]+","+dMan[1]+","+dMan[2]);
 
-                    resizeLeftIndicator((int) dMan[0]);
-                    resizeCenterIndicator((int) dMan[0]);
-                    resizeRightIndicator((int) dMan[0]);
-                }
+                    //resizeLeftIndicator((int) dMan[0]);
+                    //resizeCenterIndicator((int) dMan[0]);
+                    //resizeRightIndicator((int) dMan[0]);
+                //}
+
+                resizeLeftIndicator((int) dMan[0]);
+                resizeCenterIndicator((int) dMan[0]);
+                resizeRightIndicator((int) dMan[0]);
 
                 /* Apply the sensor values to the UI widgets */
             }
