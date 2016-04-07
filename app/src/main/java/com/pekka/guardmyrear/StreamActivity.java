@@ -26,11 +26,12 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.sql.Time;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class StreamActivity extends AppCompatActivity {
+public class StreamActivity extends AppCompatActivity implements SensorIndicatorFragment.OnFragmentInteractionListener {
     BroadcastReceiver receiver;
     private NotificationManager m_notifyman;
     private boolean mVisible;
@@ -78,6 +79,11 @@ public class StreamActivity extends AppCompatActivity {
         }
     };
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
     /*
     /**
      * The following class stores the sensor values in an object to share between threads
@@ -118,11 +124,18 @@ public class StreamActivity extends AppCompatActivity {
                 JSONObject js = SensorHandling.parseJSON(s);
                 final double[] dMan = SensorHandling.Sensorize(js);
 
-                /* Apply the sensor values to the UI widgets */
-                resizeLeftIndicator((int) dMan[0]);
-                resizeCenterIndicator((int) dMan[0]);
-                resizeRightIndicator((int) dMan[0]);
+                if(System.currentTimeMillis()%1000 < 100) {
+                    dMan[0] = Math.random() * 400;
+                    dMan[1] = Math.random() * 400;
+                    dMan[2] = Math.random() * 400;
+                    System.out.println("Values: "+dMan[0]+","+dMan[1]+","+dMan[2]);
 
+                    resizeLeftIndicator((int) dMan[0]);
+                    resizeCenterIndicator((int) dMan[0]);
+                    resizeRightIndicator((int) dMan[0]);
+                }
+
+                /* Apply the sensor values to the UI widgets */
             }
         };
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
@@ -169,6 +182,7 @@ public class StreamActivity extends AppCompatActivity {
         Uri snd = NotificationCenter.GetRingtone();
         NotificationCenter.PingNotification(m_notifyman, context, snd, "Guard My Rear", "Someone is at your rear!");
 
+        resizeCenterIndicator(200);
     }
 
     /**
@@ -262,6 +276,8 @@ public class StreamActivity extends AppCompatActivity {
 
     public void resizeIndicator(ImageView imageView, TextView textView, int distance,boolean l)
     {
+        if(imageView.getLayoutParams().height==distance)
+            return;
         System.out.println("Resized: "+distance);
         imageView.getLayoutParams().height = distance;
         if(l)
