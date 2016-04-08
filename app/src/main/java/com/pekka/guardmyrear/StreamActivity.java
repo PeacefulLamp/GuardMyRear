@@ -262,32 +262,31 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     public void resizeLeftIndicator(int distance) {
         ImageView imageView = (ImageView) findViewById(R.id.left_indicator_image);
         TextView textView = (TextView) findViewById(R.id.left_indicator_value);
-        resizeIndicator(imageView,textView,distance,false);
+        resizeIndicator(imageView, textView, distance);
     }
 
     public void resizeRightIndicator(int distance) {
         ImageView imageView = (ImageView) findViewById(R.id.right_indicator_image);
         TextView textView = (TextView) findViewById(R.id.right_indicator_value);
-        resizeIndicator(imageView,textView,distance,false);
+        resizeIndicator(imageView, textView, distance);
     }
 
     public void resizeCenterIndicator(int distance) {
         ImageView imageView = (ImageView)
                 findViewById(R.id.center_indicator_image);
         TextView textView = (TextView) findViewById(R.id.center_indicator_value);
-        resizeIndicator(imageView,textView,distance,true);
+        resizeIndicator(imageView, textView, distance);
     }
 
-    public void resizeIndicator(ImageView imageView, TextView textView, int distance,boolean l)
+    public void resizeIndicator(ImageView imageView, TextView textView, int distance)
     {
         if(imageView.getLayoutParams().height==distance)
             return;
         System.out.println("Resized: "+distance);
         imageView.getLayoutParams().height = distance;
-        if(l)
-            imageView.getLayoutParams().width = distance;
-        else
-            imageView.getLayoutParams().width = 2*distance;
+
+        imageView.getLayoutParams().width = distance;
+
         if(textView!=null)
             textView.setText(Integer.toString(distance));
     }

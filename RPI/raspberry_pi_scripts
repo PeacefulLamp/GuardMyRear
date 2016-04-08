@@ -1,0 +1,34 @@
+# RASPBERRY PI SCRIPTS
+
+On the pi, all relevant/availible scripts is in /GuardMyRear/src
+
+/* UV4L STREAMING CONFIG (uv4lstream.sh)
+# NOTES: 
+# 1) This script can be heavily simplified by changing default settings
+# in /etc/uv4l/uv4l-raspicam.conf and uv4l-uvc.conf
+# 2) Must be run with root priviligies! (Or else we can't kill processes)
+
+#!/bin/bash
+pkill u4vl # Kill process if already running
+uv4l -nopreview --auto-video_nr --driver raspicam --encoding mjpeg --width 640 --height 480 --framerate 15 --server-option '--port=8554' --server-option '--max-queued-connections=30' --server-option '--max-streams=10' --server-option '--max-threads=29'
+
+/* UV4L INSTALL SCRIPTS (uv4l_installscript.sh)
+# NOTES:
+# 1) This script must be run as root
+# 2) This script is not done yet, read TODO in script to see what remains
+
+*/
+
+
+
+/* ULTRASONIC SENSORS CONFIG/SCRIPTS
+
+
+
+
+*/
+
+
+
+
+
