@@ -103,6 +103,8 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
      * #########################################
      **/
 
+    static int[]dMan = {0, 0, 0};
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,23 +123,36 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
                 String s = intent.getStringExtra("message");
 
                 /* Parse the JSON string and get sensor values */
+
                 JSONObject js = SensorHandling.parseJSON(s);
-                final double[] dMan = SensorHandling.Sensorize(js);
+
 
                 //if(System.currentTimeMillis()%1000 < 100) {
-                    //dMan[0] = Math.random() * 400;
-                    //dMan[1] = Math.random() * 400;
-                    //dMan[2] = Math.random() * 400;
-                    //System.out.println("Values: "+dMan[0]+","+dMan[1]+","+dMan[2]);
+                //dMan[0] = Math.random() * 400;
+                //dMan[1] = Math.random() * 400;
+                //dMan[2] = Math.random() * 400;
+                //System.out.println("Values: "+dMan[0]+","+dMan[1]+","+dMan[2]);
 
-                    //resizeLeftIndicator((int) dMan[0]);
-                    //resizeCenterIndicator((int) dMan[0]);
-                    //resizeRightIndicator((int) dMan[0]);
+                //resizeLeftIndicator((int) dMan[0]);
+                //resizeCenterIndicator((int) dMan[0]);
+                //resizeRightIndicator((int) dMan[0]);
                 //}
 
-                resizeLeftIndicator((int) dMan[0]);
-                resizeCenterIndicator((int) dMan[0]);
-                resizeRightIndicator((int) dMan[0]);
+
+                int[] dMan2 = SensorHandling.Sensorize(js);
+                //System.out.println(dMan2[0]);
+                if (dMan2[0] != dMan[0]){
+                    dMan[0] = dMan2[0];
+                    resizeLeftIndicator( dMan[0]);
+                }
+                if (dMan2[1] != dMan[1]){
+                    dMan[1] = dMan2[1];
+                    resizeCenterIndicator( dMan[1]);
+                }
+                if (dMan[2] != dMan[1]){
+                    dMan[2] = dMan2[1];
+                    resizeRightIndicator( dMan[0]);
+                }
 
                 /* Apply the sensor values to the UI widgets */
             }
