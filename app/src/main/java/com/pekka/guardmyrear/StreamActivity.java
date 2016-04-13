@@ -84,6 +84,19 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
     }
 
+    /*
+    /**
+     * The following class stores the sensor values in an object to share between threads
+     */
+
+    public class DataObject{
+        public String data_string;
+
+        public DataObject(){
+            data_string = "{\"key1\":0, \"key2\":0, \"key3\":0}"; //lazy quick fix to avoid null-pointer error in parseJSON method
+        }
+    }
+
     /**
      * #########################################
      * ______________ON  CREATE ________________
@@ -263,7 +276,15 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
                 findViewById(R.id.center_indicator_image);
         TextView textView = (TextView) findViewById(R.id.center_indicator_value);
 
-        resizeIndicator(imageView, textView, distance);
+        if(imageView.getLayoutParams().height==distance)
+            return;
+        System.out.println("Resized: "+distance);
+        imageView.getLayoutParams().height = distance;
+
+        imageView.getLayoutParams().width = distance*2;
+
+        if(textView!=null)
+            textView.setText(Integer.toString(distance));
     }
 
     public void resizeIndicator(ImageView imageView, TextView textView, int distance)
