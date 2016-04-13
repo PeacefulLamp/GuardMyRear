@@ -24,6 +24,7 @@ public class NewLayoutActivity extends AppCompatActivity {
     ImageButton connectButton;
 
     static boolean SensorizeServiceStarted = false;
+    static Intent SensorizeService = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,17 +32,6 @@ public class NewLayoutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_new_layout);
 
         connectButton = (ImageButton) findViewById(R.id.connectButton);
-
-        /**
-         * Start sensor service running in background, where broadcast activity
-         *  is performed. Receives JSON values.
-         */
-        Intent intent = new Intent(this, SensorizingService.class);
-        if(!SensorizeServiceStarted)
-        {
-            System.out.println("Service already active");
-            startService(intent);
-        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -92,8 +82,6 @@ public class NewLayoutActivity extends AppCompatActivity {
         SupplicantState ws = wman.getConnectionInfo().getSupplicantState();
         NetworkInfo.DetailedState wstate = WifiInfo.getDetailedStateOf(ws);
 
-        System.out.println(wstate.name());
-
         /* If the user is not connected, open the WiFi settings */
         if(
                 !wman.isWifiEnabled() ||
@@ -131,12 +119,29 @@ public class NewLayoutActivity extends AppCompatActivity {
                 startStream();
             }
         }
+        /* For StreamActivity */
+        else if(requestCode==11)
+        {
+            stopService(SensorizeService);
+            SensorizeService = null;
+            SensorizeServiceStarted = false;
+        }
     }
     protected void startStream()
     {
+        /**
+         * Start sensor service running in background, where broadcast activity
+         *  is performed. Receives JSON values.
+         */
+        if(SensorizeService==null)
+        {
+            SensorizeService = new Intent(this, SensorizingService.class);
+            startService(SensorizeService);
+        }
+
         /* Finally, launch the stream view with video and sensor data */
         Intent a = new Intent(this, StreamActivity.class);
         a.putExtra(getResources().getString(R.string.stream_resource), "http://192.168.42.1:8554/stream");
-        startActivity(a);
+        startActivityForResult(a,11);
     }
 }

@@ -32,7 +32,6 @@ public class SensorizingService extends Service {
         }
     }
 
-
     /**
      * the following class, when it is ready to do so,
      * reads the latest sensor data, does some calculations,
