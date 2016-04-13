@@ -28,11 +28,13 @@ public class SensorHandling {
      * @param v Value to be transformed, distance
      * @return Readily transformed value to scale UI elements
      */
-    public static double FilterSensorValue(double v)
-    {
+    public static double FilterSensorValue(double v) {
         /*WARNING: MAGIC COOKIES INBOUND */
-        if(v>0)
-            return Math.max(Math.min(1 / v, 500)*40000,1);
+
+        if(v > 0){
+            double number = Math.max(Math.min(1 / v, 500) * 40000, 1);
+            return 10*Math.round(number/10);
+        }
         return 1;
     }
 
