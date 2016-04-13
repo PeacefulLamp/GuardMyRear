@@ -16,6 +16,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class SensorizingService extends Service {
     LocalBroadcastManager broadcaster;
@@ -62,13 +63,14 @@ public class SensorizingService extends Service {
                     e.printStackTrace();
                 }
 
-                data_string = dataObject.data_string;
-
-                UI_handler.post(new Runnable(){
-                    public void run(){
-                        sendResult(data_string);
-                    }
-                });
+                if (! dataObject.data_string.equals(data_string)){
+                    data_string = dataObject.data_string;
+                    UI_handler.post(new Runnable() {
+                        public void run() {
+                            sendResult(data_string);
+                        }
+                    });
+                }
             }
         }
     }
