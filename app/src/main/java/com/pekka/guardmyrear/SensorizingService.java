@@ -109,6 +109,9 @@ public class SensorizingService extends Service {
          * Listening to UDP multicast and receiving sensor packets
          */
         private String SocketListen(DatagramSocket s) {
+            if(s==null)
+                return "";
+
             /* Read socket data from multicast UDP socket */
             byte[] data = new byte[4096];
             DatagramPacket p = new DatagramPacket(data, data.length);
@@ -154,7 +157,7 @@ public class SensorizingService extends Service {
     @Override
     public void onCreate() {
         broadcaster = LocalBroadcastManager.getInstance(this);
-
+        NewLayoutActivity.SensorizeServiceStarted = true;
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

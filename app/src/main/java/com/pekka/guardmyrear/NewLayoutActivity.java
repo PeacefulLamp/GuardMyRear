@@ -23,6 +23,8 @@ public class NewLayoutActivity extends AppCompatActivity {
 
     ImageButton connectButton;
 
+    static boolean SensorizeServiceStarted = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,7 +37,11 @@ public class NewLayoutActivity extends AppCompatActivity {
          *  is performed. Receives JSON values.
          */
         Intent intent = new Intent(this, SensorizingService.class);
-        startService(intent);
+        if(!SensorizeServiceStarted)
+        {
+            System.out.println("Service already active");
+            startService(intent);
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
