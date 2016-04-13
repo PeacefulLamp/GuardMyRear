@@ -34,7 +34,7 @@ public class SensorHandling {
 
         double v = value;
         double number = Math.min(40000 / v - 270, 500);
-        int n2 = 10* (int) Math.round(number/10.0);
+        int n2 = 10* (int) Math.round(number/10.0); //on second thoughts; this should be done on the pi-side
         return Math.max(n2, 1);
     }
 
