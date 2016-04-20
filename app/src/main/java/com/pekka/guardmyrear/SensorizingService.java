@@ -33,7 +33,6 @@ public class SensorizingService extends Service {
         }
     }
 
-
     /**
      * the following class, when it is ready to do so,
      * reads the latest sensor data, does some calculations,
@@ -42,7 +41,6 @@ public class SensorizingService extends Service {
 
     public class GraphicsThread extends Thread{
 
-        StreamActivity m_activity;
         DataObject dataObject;
         String data_string;
         Handler UI_handler;
@@ -167,7 +165,7 @@ public class SensorizingService extends Service {
         System.out.println("________________SERVICE IS RUNNING______________");
 
 
-        Handler handler = new Handler(); //handler is now bound to this thread (the UI-thread)
+        Handler handler = new Handler(); //handler is now bound to this thread
 
         DataObject dataObject = new DataObject();
 

@@ -17,8 +17,7 @@ public class SensorHandling {
 
         try {
             jsonObject = new JSONObject(s);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (JSONException ignored) {
         }
         return jsonObject;
     }
@@ -31,7 +30,7 @@ public class SensorHandling {
         /*WARNING: MAGIC COOKIES INBOUND */
 
         double v = value;
-        double number = Math.min(40000 / v - 270, 500);
+        double number = Math.min(40000/ v - 270, 500);
         //int n2 = 10* (int) Math.round(number/10.0); //on second thoughts; this should be done on the pi-side
         return Math.max((int) number, 1);
     }
@@ -41,25 +40,25 @@ public class SensorHandling {
      * @param jsonObject A valid JSON object, must not be null
      * @return Static array of 3 sensor values
      */
+
+    public static int sensor1 = 0;
+    public static int sensor2 = 0;
+    public static int sensor3 = 0;
+
     public static int[] Sensorize(JSONObject jsonObject) {
 
-        int sensor1 = 0;
-        int sensor2 = 0;
-        int sensor3 = 0;
-
         try {
-            sensor1 = jsonObject.getInt("k1");
-            sensor2 = jsonObject.getInt("k2");
-            sensor3 = jsonObject.getInt("k3");
+            sensor1 = jsonObject.getInt("key1");
+            sensor2 = jsonObject.getInt("key2");
+            sensor3 = jsonObject.getInt("key3");
         } catch (JSONException ignored) {
         }
 
         //sensor1 = FilterSensorValue(sensor1);
         //sensor2 = FilterSensorValue(sensor2);
         //sensor3 = FilterSensorValue(sensor3);
-        if (sensor1 == 0){
-            System.out.println("sensor 1 er null")ø
-        }
+
+        //System.out.println(sensor1);
 
         return new int[]{sensor1, sensor2, sensor3};
     }

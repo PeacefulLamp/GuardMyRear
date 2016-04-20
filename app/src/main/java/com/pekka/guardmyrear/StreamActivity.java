@@ -34,6 +34,9 @@ import java.util.TimerTask;
 public class StreamActivity extends AppCompatActivity implements SensorIndicatorFragment.OnFragmentInteractionListener {
     BroadcastReceiver receiver;
     private NotificationManager m_notifyman;
+    private boolean m_isCloseAlready = false;
+    final private int proximity = 100;
+
     private boolean mVisible;
 
     /**
@@ -116,6 +119,11 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
          * Aforementioned worker is SensorizingService, which is launched
          *  on application start.
          */
+        Context context = getApplicationContext();
+        m_notifyman = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        final Uri snd = NotificationCenter.GetRingtone();
+
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -126,21 +134,33 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
                 JSONObject js = SensorHandling.parseJSON(s);
 
+                if(js==null)
+                    return;
 
-                //if(System.currentTimeMillis()%1000 < 100) {
-                //dMan[0] = Math.random() * 400;
-                //dMan[1] = Math.random() * 400;
-                //dMan[2] = Math.random() * 400;
-                //System.out.println("Values: "+dMan[0]+","+dMan[1]+","+dMan[2]);
+                final int[] dMan = SensorHandling.Sensorize(js);
 
-                //resizeLeftIndicator((int) dMan[0]);
-                //resizeCenterIndicator((int) dMan[0]);
-                //resizeRightIndicator((int) dMan[0]);
-                //}
+                /**
+                if(dMan[0]<proximity || dMan[1]<proximity || dMan[2]<proximity)
+                {
+                    if(!m_isCloseAlready)
+                    {
+                        NotificationCenter.PingNotification(m_notifyman, context, snd, "Guard My Rear", "Someone is at your rear!");
+                    }
+                }else
+                    m_isCloseAlready = false;
+                 **/
 
-
+                /* Apply the sensor values to the UI widgets */
+                
                 int[] dMan2 = SensorHandling.Sensorize(js);
-                //System.out.println(dMan2[0]);
+
+                resizeRightIndicator( dMan[0]);
+                resizeCenterIndicator( dMan[1]);
+                resizeLeftIndicator( dMan[2]);
+
+
+                /** Forget about this for now:
+                /**
                 if (dMan2[0] != dMan[0]){
                     dMan[0] = dMan2[0];
                     resizeLeftIndicator( dMan[0]);
@@ -149,12 +169,12 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
                     dMan[1] = dMan2[1];
                     resizeCenterIndicator( dMan[1]);
                 }
-                if (dMan[2] != dMan[1]){
-                    dMan[2] = dMan2[1];
+                if (dMan2[2] != dMan[2]){
+                    dMan[2] = dMan2[2];
                     resizeRightIndicator( dMan[0]);
                 }
+                 **/
 
-                /* Apply the sensor values to the UI widgets */
             }
         };
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
@@ -194,12 +214,6 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
          * some socket-exception (not tested) which might have some quick fix, but we should
          * investigate on how to get everything running in the background
          */
-
-        Context context = getApplicationContext();
-        m_notifyman = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        Uri snd = NotificationCenter.GetRingtone();
-        NotificationCenter.PingNotification(m_notifyman, context, snd, "Guard My Rear", "Someone is at your rear!");
 
         resizeCenterIndicator(200);
     }
@@ -303,8 +317,9 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     }
 
     public void resizeIndicator(ImageView imageView, TextView textView, int distance){
+        if(imageView.getLayoutParams().height==distance)
+            return;
 
-        //System.out.println("Resized: "+distance);
         imageView.getLayoutParams().height = distance;
 
         imageView.getLayoutParams().width = distance;
