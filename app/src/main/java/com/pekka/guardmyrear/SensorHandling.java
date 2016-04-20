@@ -17,8 +17,7 @@ public class SensorHandling {
 
         try {
             jsonObject = new JSONObject(s);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (JSONException ignored) {
         }
         return jsonObject;
     }
