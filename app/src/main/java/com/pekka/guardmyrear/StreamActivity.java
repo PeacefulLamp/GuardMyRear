@@ -7,6 +7,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
@@ -36,6 +38,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     private NotificationManager m_notifyman;
     private boolean m_isCloseAlready = false;
     final private int proximity = 100;
+    private ToneGenerator toneGenerator;
 
     private boolean mVisible;
 
@@ -121,6 +124,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
          */
         Context context = getApplicationContext();
         m_notifyman = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        toneGenerator = new ToneGenerator(AudioManager.STREAM_DTMF,ToneGenerator.MAX_VOLUME);
 
         final Uri snd = NotificationCenter.GetRingtone();
 
@@ -143,7 +147,8 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
                 {
                     if(!m_isCloseAlready)
                     {
-                        NotificationCenter.PingNotification(m_notifyman, context, snd, "Guard My Rear", "Someone is at your rear!");
+                        // NotificationCenter.PingNotification(m_notifyman, context, snd, "Guard My Rear", "Someone is at your rear!");
+                        toneGenerator.startTone(ToneGenerator.TONE_DTMF_A, 100);
                     }
                 }else
                     m_isCloseAlready = false;
