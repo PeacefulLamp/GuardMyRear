@@ -27,14 +27,14 @@ public class SensorHandling {
      * @param v Value to be transformed, distance
      * @return Readily transformed value to scale UI elements
      */
-    public static double FilterSensorValue(double v) {
+    public static int FilterSensorValue(int value) {
         /*WARNING: MAGIC COOKIES INBOUND */
 
-        if(v > 0){
-            double number = Math.max(Math.min(1 / v, 500) * 40000, 1);
-            return 10*Math.round(number/10);
-        }
-        return 1;
+
+        double v = value;
+        double number = Math.min(40000 / v - 270, 500);
+        int n2 = 10* (int) Math.round(number/10.0); //on second thoughts; this should be done on the pi-side
+        return Math.max(n2, 1);
     }
 
     /**
@@ -42,16 +42,16 @@ public class SensorHandling {
      * @param jsonObject A valid JSON object, must not be null
      * @return Static array of 3 sensor values
      */
-    public static double[] Sensorize(JSONObject jsonObject) {
+    public static int[] Sensorize(JSONObject jsonObject) {
 
-        double sensor1 = 0;
-        double sensor2 = 0;
-        double sensor3 = 0;
+        int sensor1 = 0;
+        int sensor2 = 0;
+        int sensor3 = 0;
 
         try {
-            sensor1 = jsonObject.getDouble("key1");
-            sensor2 = jsonObject.getDouble("key2");
-            sensor3 = jsonObject.getDouble("key3");
+            sensor1 = jsonObject.getInt("key1");
+            sensor2 = jsonObject.getInt("key2");
+            sensor3 = jsonObject.getInt("key3");
         } catch (JSONException ignored) {
         }
 
@@ -59,6 +59,6 @@ public class SensorHandling {
         sensor2 = FilterSensorValue(sensor2);
         sensor3 = FilterSensorValue(sensor3);
 
-        return new double[]{sensor1, sensor2, sensor3};
+        return new int[]{sensor1, sensor2, sensor3};
     }
 }

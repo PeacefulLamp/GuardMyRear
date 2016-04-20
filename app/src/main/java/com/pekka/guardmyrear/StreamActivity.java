@@ -106,6 +106,8 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
      * #########################################
      **/
 
+    static int[]dMan = {0, 0, 0};
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,6 +131,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
                 String s = intent.getStringExtra("message");
 
                 /* Parse the JSON string and get sensor values */
+
                 JSONObject js = SensorHandling.parseJSON(s);
 
                 if(js==null)
@@ -146,9 +149,21 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
                     m_isCloseAlready = false;
 
                 /* Apply the sensor values to the UI widgets */
-                resizeLeftIndicator((int) dMan[0]);
-                resizeCenterIndicator((int) dMan[0]);
-                resizeRightIndicator((int) dMan[0]);
+                
+                int[] dMan2 = SensorHandling.Sensorize(js);
+                //System.out.println(dMan2[0]);
+                if (dMan2[0] != dMan[0]){
+                    dMan[0] = dMan2[0];
+                    resizeLeftIndicator( dMan[0]);
+                }
+                if (dMan2[1] != dMan[1]){
+                    dMan[1] = dMan2[1];
+                    resizeCenterIndicator( dMan[1]);
+                }
+                if (dMan[2] != dMan[1]){
+                    dMan[2] = dMan2[1];
+                    resizeRightIndicator( dMan[0]);
+                }
 
             }
         };
