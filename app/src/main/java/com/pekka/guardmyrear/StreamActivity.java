@@ -327,5 +327,11 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
         if(textView!=null)
             textView.setText(Integer.toString(distance));
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.finish();
+    }
 }
 
