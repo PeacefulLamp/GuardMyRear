@@ -23,6 +23,7 @@ public class NewLayoutActivity extends AppCompatActivity {
 
     static boolean SensorizeServiceStarted = false;
     static Intent SensorizeService = null;
+    static Intent StreamIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +34,9 @@ public class NewLayoutActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        SensorizeService = new Intent(this, SensorizingService.class);
+        StreamIntent = new Intent(this, StreamActivity.class);
     }
 
     /**
@@ -99,7 +103,6 @@ public class NewLayoutActivity extends AppCompatActivity {
         else if(requestCode==11)
         {
             stopService(SensorizeService);
-            SensorizeService = null;
             SensorizeServiceStarted = false;
         }
     }
@@ -109,15 +112,13 @@ public class NewLayoutActivity extends AppCompatActivity {
          * Start sensor service running in background, where broadcast activity
          *  is performed. Receives JSON values.
          */
-        if(SensorizeService==null)
-        {
-            SensorizeService = new Intent(this, SensorizingService.class);
+        if (!SensorizeServiceStarted){
             startService(SensorizeService);
+            SensorizeServiceStarted = true;
         }
 
         /* Finally, launch the stream view with video and sensor data */
-        Intent a = new Intent(this, StreamActivity.class);
-        a.putExtra(getResources().getString(R.string.stream_resource), "http://192.168.42.1:8554/stream");
-        startActivityForResult(a, 11);
+        StreamIntent.putExtra(getResources().getString(R.string.stream_resource), "http://192.168.42.1:8554/stream");
+        startActivityForResult(StreamIntent, 11);
     }
 }
