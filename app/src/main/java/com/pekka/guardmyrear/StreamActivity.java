@@ -137,7 +137,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
                 if(js==null)
                     return;
 
-                final double[] dMan = SensorHandling.Sensorize(js);
+                final int[] dMan = SensorHandling.Sensorize(js);
 
                 if(dMan[0]<proximity || dMan[1]<proximity || dMan[2]<proximity)
                 {
