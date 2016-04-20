@@ -38,7 +38,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     private NotificationManager m_notifyman;
     private boolean m_isCloseAlready = false;
     final private int proximity = 100;
-    private ToneGenerator toneGenerator;
+
 
     private boolean mVisible;
 
@@ -110,7 +110,12 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
      **/
 
     static int[]dMan = {0, 0, 0};
-
+    long lastBeepTime = 0;
+    long currentTime;
+    int beepDuration = 0;
+    final static int MAGIC_COOKIE = 5;    // How much we amplify the distance by, to convert to ms
+    final static int MAGIC_PAUSE_DURATION = 50; //  pause between beep (ms)
+    ToneGenerator toneGenerator;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,8 +129,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
          */
         Context context = getApplicationContext();
         m_notifyman = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        toneGenerator = new ToneGenerator(AudioManager.STREAM_DTMF,ToneGenerator.MAX_VOLUME);
-
+        toneGenerator = new ToneGenerator(AudioManager.STREAM_DTMF, ToneGenerator.MAX_VOLUME);
         final Uri snd = NotificationCenter.GetRingtone();
 
         receiver = new BroadcastReceiver() {
@@ -148,14 +152,35 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
                     if(!m_isCloseAlready)
                     {
                         // NotificationCenter.PingNotification(m_notifyman, context, snd, "Guard My Rear", "Someone is at your rear!");
-                        toneGenerator.startTone(ToneGenerator.TONE_DTMF_A, 100);
+
+
                     }
                 }else
                     m_isCloseAlready = false;
 
                 /* Apply the sensor values to the UI widgets */
-                
+
+
                 int[] dMan2 = SensorHandling.Sensorize(js);
+
+                // Find closest distance of all sensor values
+                int closestDist = Integer.MAX_VALUE;
+                for (int i = 0; i < dMan2.length; i++) {
+                    if(dMan2[i]< closestDist){
+                        closestDist = dMan2[i];
+                    }
+                }
+                currentTime = System.currentTimeMillis();
+                // Check how long it has been since last beep
+                if(currentTime-lastBeepTime > beepDuration+MAGIC_PAUSE_DURATION){
+                    // Update when we last beeped
+                    lastBeepTime = System.currentTimeMillis();
+                    //BEEEEEEEEEEEEEEP Based on distance
+                    beepDuration = Math.max(closestDist*MAGIC_COOKIE, 200);
+                    toneGenerator.startTone(ToneGenerator.TONE_DTMF_A, beepDuration);
+                }
+
+
                 //System.out.println(dMan2[0]);
                 if (dMan2[0] != dMan[0]){
                     dMan[0] = dMan2[0];
@@ -230,6 +255,8 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
     /**
      * Toggle visibility of notification bar and action bar
      */
+
+
     private void toggle() {
         if (mVisible) {
             hide();
