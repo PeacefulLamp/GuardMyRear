@@ -58,7 +58,7 @@ public class SensorHandling {
         //sensor2 = FilterSensorValue(sensor2);
         //sensor3 = FilterSensorValue(sensor3);
 
-        //System.out.println(sensor1);
+        System.out.println(sensor1);
 
         return new int[]{sensor1, sensor2, sensor3};
     }
