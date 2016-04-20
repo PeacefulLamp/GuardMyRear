@@ -30,8 +30,7 @@ public class SensorHandling {
         /*WARNING: MAGIC COOKIES INBOUND */
 
         double v = value;
-        double number = Math.min(40000/ v - 270, 500);
-        //int n2 = 10* (int) Math.round(number/10.0); //on second thoughts; this should be done on the pi-side
+        double number = Math.min(500* (100.0 - value)/100, 500);
         return Math.max((int) number, 1);
     }
 
@@ -54,8 +53,8 @@ public class SensorHandling {
         } catch (JSONException ignored) {
         }
 
-        //sensor1 = FilterSensorValue(sensor1);
-        //sensor2 = FilterSensorValue(sensor2);
+        sensor1 = FilterSensorValue(sensor1);
+        sensor2 = FilterSensorValue(sensor2);
         //sensor3 = FilterSensorValue(sensor3);
 
         System.out.println(sensor1);
