@@ -293,7 +293,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
         if(imageView.getLayoutParams().height==distance)
             return;
-        System.out.println("Resized: "+distance);
+        //System.out.println("Resized: "+distance);
         imageView.getLayoutParams().height = distance;
 
         imageView.getLayoutParams().width = distance*2;
@@ -304,7 +304,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
     public void resizeIndicator(ImageView imageView, TextView textView, int distance){
 
-        System.out.println("Resized: "+distance);
+        //System.out.println("Resized: "+distance);
         imageView.getLayoutParams().height = distance;
 
         imageView.getLayoutParams().width = distance;
