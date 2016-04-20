@@ -14,8 +14,6 @@ import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 
@@ -35,7 +33,6 @@ public class NewLayoutActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
     }
 
     /**
@@ -121,6 +118,6 @@ public class NewLayoutActivity extends AppCompatActivity {
         /* Finally, launch the stream view with video and sensor data */
         Intent a = new Intent(this, StreamActivity.class);
         a.putExtra(getResources().getString(R.string.stream_resource), "http://192.168.42.1:8554/stream");
-        startActivityForResult(a,11);
+        startActivityForResult(a, 11);
     }
 }
