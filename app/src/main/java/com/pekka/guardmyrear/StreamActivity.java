@@ -175,7 +175,7 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
                     // Update when we last beeped
                     lastBeepTime = System.currentTimeMillis();
                     //BEEEEEEEEEEEEEEP Based on distance
-                    beepDuration = Math.max(closestDist*MAGIC_COOKIE, 200);
+                    beepDuration = Math.max(closestDist*MAGIC_COOKIE, 100);
                     toneGenerator.startTone(ToneGenerator.TONE_DTMF_A, beepDuration);
                 }
 
@@ -186,6 +186,13 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
             }
         };
 
+        WebView wview = (WebView)findViewById(R.id.webView);
+        wview.setX(-20);
+        wview.setY(-60);
+        wview.setMinimumWidth(wview.getWidth() + 20);
+        wview.setMinimumHeight(wview.getHeight() + 60);
+        wview.setRight(wview.getWidth()+20);
+        wview.setBottom(wview.getHeight()+60);
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
         broadcastManager.registerReceiver(receiver,new IntentFilter("result"));
