@@ -343,8 +343,17 @@ public class StreamActivity extends AppCompatActivity implements SensorIndicator
 
         imageView.getLayoutParams().width = distance;
 
+
+        /**
+         * Quick fix
+         * Mathematical operation to convert back from dp to cm
+         * a better solution is to create a new JSON object with 6 parameters
+         * to pass to the UI-Thread (this thread)
+         */
+        double cMeters = 100 - distance/5.0;
+
         if(textView!=null)
-            textView.setText(Integer.toString(distance));
+            textView.setText(Integer.toString((int) cMeters) + " cm");
     }
 
     @Override

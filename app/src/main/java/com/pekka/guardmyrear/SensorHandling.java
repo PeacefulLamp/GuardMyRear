@@ -30,7 +30,7 @@ public class SensorHandling {
         /*WARNING: MAGIC COOKIES INBOUND */
 
         double v = value;
-        double number = Math.min(500* (100.0 - value)/100, 500);
+        double number = Math.min(5* (100.0 - value), 500);
         return Math.max((int) number, 1);
     }
 
